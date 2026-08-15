@@ -123,9 +123,9 @@ export default function Home() {
         <div className="bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
           <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">So'nggi faoliyatlar</h2>
           
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-4 overflow-y-auto pr-2 max-h-[310px] custom-scrollbar">
             {mockTests.map((test) => (
-              <Link key={test.id} href={`/saved-tests/${test.id}`} className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 p-1 -m-1 rounded-xl transition-colors">
+              <Link key={test.id} href={`/saved-tests/${test.id}`} className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 p-2 -m-2 rounded-xl transition-colors">
                 <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 rounded-xl flex items-center justify-center shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
