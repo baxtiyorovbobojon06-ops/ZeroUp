@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Roboto, Nunito } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { Toaster } from "react-hot-toast";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
+const roboto = Roboto({ weight: ['400', '500', '700'], subsets: ["latin", "cyrillic"], variable: '--font-roboto' });
+const nunito = Nunito({ subsets: ["latin", "cyrillic"], variable: '--font-nunito' });
 
 export const metadata: Metadata = {
   title: "MaktabAI - O'qituvchilar uchun AI yordamchi",
@@ -18,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uz" className="light">
-      <body className={`${inter.className} text-slate-900 dark:text-slate-100 antialiased h-[100dvh] flex flex-col md:flex-row overflow-hidden mesh-bg relative transition-colors duration-300`}>
+    <html lang="uz" className="light text-base font-inter">
+      <body className={`${inter.variable} ${roboto.variable} ${nunito.variable} text-slate-900 dark:text-slate-100 antialiased h-[100dvh] flex flex-col md:flex-row overflow-hidden mesh-bg relative transition-colors duration-300`}>
         <SettingsProvider>
           {/* Subtle overlay for the mesh background so it's not too bright */}
           <div className="absolute inset-0 bg-white/40 dark:bg-slate-900/70 backdrop-blur-[2px] z-0 pointer-events-none transition-colors duration-300"></div>

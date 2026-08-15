@@ -14,11 +14,15 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-inter: var(--font-inter), sans-serif;
+  --font-roboto: var(--font-roboto), sans-serif;
+  --font-nunito: var(--font-nunito), sans-serif;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
+  font-family: inherit;
 }
 
 /* Premium Animations & Utilities */
