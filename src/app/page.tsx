@@ -123,61 +123,22 @@ export default function Home() {
           <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">So'nggi faoliyatlar</h2>
           
           <div className="flex-1 space-y-4">
-            {/* Item 1 */}
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 rounded-xl flex items-center justify-center shrink-0">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate">8-sinf Algebra dars rejasi yaratildi</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Bugun, 10:30</p>
-              </div>
-              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-2.5 py-1 rounded-full shrink-0">
-                Dars rejasi
-              </span>
-            </div>
-
-            {/* Item 2 */}
-            <Link href={`/saved-tests/${mockTests[0]?.id}`} className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 p-1 -m-1 rounded-xl transition-colors">
-              <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 rounded-xl flex items-center justify-center shrink-0">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate group-hover:text-indigo-600 transition-colors">9-sinf "Fotosintez" testi yaratildi</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Bugun, 09:15</p>
-              </div>
-              <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/40 px-2.5 py-1 rounded-full shrink-0">
-                Test
-              </span>
-            </Link>
-
-            {/* Item 3 */}
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 text-blue-500 rounded-xl flex items-center justify-center shrink-0">
-                <CheckSquare className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate">15 ta javob tekshirildi</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kecha, 16:45</p>
-              </div>
-              <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-2.5 py-1 rounded-full shrink-0">
-                Tekshirildi
-              </span>
-            </div>
-
-            {/* Item 4 */}
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-orange-50 dark:bg-orange-900/30 text-orange-500 rounded-xl flex items-center justify-center shrink-0">
-                <BarChart2 className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate">May oyi hisobot yaratildi</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Kecha, 14:20</p>
-              </div>
-              <span className="text-[10px] font-semibold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/40 px-2.5 py-1 rounded-full shrink-0">
-                Hisobot
-              </span>
-            </div>
+            {mockTests.slice(0, 4).map((test) => (
+              <Link key={test.id} href={`/saved-tests/${test.id}`} className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 p-1 -m-1 rounded-xl transition-colors">
+                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 rounded-xl flex items-center justify-center shrink-0">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate group-hover:text-indigo-600 transition-colors">
+                    {test.grade} {test.subject} - {test.title}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{test.timeAgo}</p>
+                </div>
+                <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/40 px-2.5 py-1 rounded-full shrink-0">
+                  Test
+                </span>
+              </Link>
+            ))}
           </div>
           
           <div className="mt-6 text-center">
