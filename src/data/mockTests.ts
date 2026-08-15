@@ -19,7 +19,7 @@ export interface SavedTest {
   questions: Question[];
 }
 
-export const mockTests: SavedTest[] = [
+const baseTests: SavedTest[] = [
   {
     id: "test-1",
     title: "Yurak tuzilishi",
@@ -165,4 +165,18 @@ export const mockTests: SavedTest[] = [
       }
     ]
   }
+];
+
+// Generate 15 more tests for a total of 20
+export const mockTests: SavedTest[] = [
+  ...baseTests,
+  ...Array.from({ length: 15 }).map((_, i) => {
+    const base = baseTests[i % 5];
+    return {
+      ...base,
+      id: `test-${i + 6}`,
+      title: `${base.title} (Nusxa ${i + 1})`,
+      timeAgo: `${i + 4} kun oldin`
+    };
+  })
 ];
