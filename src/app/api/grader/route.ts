@@ -24,23 +24,26 @@ export async function POST(request: Request) {
     }
 
     const prompt = `
-      Sen tajribali maktab o'qituvchisisan.
-      O'quvchining quyidagi topshiriqqa bergan javobini tekshir va baho ber.
+      Sen o'quvchilarning vazifalarini xolis va tahliliy tekshiruvchi o'qituvchi yordamchisan. Quyidagi topshiriq sharti va o'quvchining javobini tahlil qil:
 
-      Topshiriq:
-      ${assignment}
+      Topshiriq sharti: ${assignment}
 
-      O'quvchi javobi:
-      ${student_answer}
+      O'quvchining javobi: ${student_answer}
 
-      Javob faqat JSON formatida bo'lsin:
+      Natijani quyidagi strukturada ber:
+      - Yakuniy Baho: (0 dan 100 gacha yoki 5 ballik tizimda)
+      - Xato va kamchiliklar: (Agar xato bo'lsa, nima uchun xato ekanligini aniq tushuntir)
+      - Umumiy xulosa: (Qisqacha baho)
+      - Tavsiya: (O'quvchi bu mavzuni yaxshiroq tushunishi uchun nima qilishi kerakligiga maslahat)
+
+      MUHIM: Tizim to'g'ri ishlashi uchun ushbu natijalarni aynan quyidagi qat'iy JSON formatida qaytarishing shart:
       {
-        "score": "Baho (masalan: 100/100, 80/100)",
+        "score": "Yakuniy Baho (masalan: 100/100, 5/5)",
         "status": "To'g'ri, Qisman to'g'ri, yoki Xato",
-        "correct_parts": ["To'g'ri bajarilgan joyi"],
-        "mistakes": ["Xato qilingan joyi"],
-        "feedback": "Umumiy xulosa va tushuntirish",
-        "recommendation": "Keyingi qadam uchun tavsiya"
+        "correct_parts": ["To'g'ri bajarilgan joyi (agar bo'lsa)"],
+        "mistakes": ["Xato va kamchiliklar haqida aniq tushuntirish"],
+        "feedback": "Umumiy xulosa",
+        "recommendation": "Tavsiya qismi"
       }
     `;
 

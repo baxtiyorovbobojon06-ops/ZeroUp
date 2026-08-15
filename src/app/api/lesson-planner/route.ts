@@ -41,14 +41,21 @@ export async function POST(request: Request) {
     }
 
     const promptText = `
-Sen tajribali va zamonaviy maktab o'qituvchisisan. Quyidagi ma'lumotlar va taqdim etilgan qo'shimcha resurs (agar mavjud bo'lsa) asosida juda batafsil, interaktiv va ilg'or pedagogik usullarga asoslangan dars rejasini tuzib ber.
-Faqat JSON formatda qaytar (hech qanday markdown qatnashmasin).
+Sen tajribali metodist va O'zbekiston maktablari uchun sun'iy intellekt ta'lim yordamchisan. Berilgan ma'lumotlar va taqdim etilgan qo'shimcha resurs (agar mavjud bo'lsa) asosida ${duration} daqiqalik mukammal va interaktiv dars rejasini tuzib ber.
 
 Sinf: ${grade}
 Fan: ${subject}
 Mavzu: ${topic}
-Dars davomiyligi: ${duration} daqiqa
 ${extractedText ? `Qo'shimcha material matni: ${extractedText.substring(0, 15000)}...` : ""}
+
+Dars rejasi quyidagi qismlardan iborat bo'lsin:
+- Darsning maqsadi va kutiladigan natijalar.
+- O'quvchilarni qiziqtirish uchun qiziqarli savol yoki kichik interaktiv o'yin (Gamification).
+- Yangi mavzuni tushuntirish bosqichlari (vaqti taqsimlangan holda).
+- Mustahkamlash uchun savollar va topshiriqlar.
+- Uyga vazifa.
+
+Javobni aniq, o'qishga qulay va o'zbek tilida taqdim et. MUHIM: Tizim to'g'ri ishlashi uchun javobing FAQAT quyidagi aniq JSON formatida bo'lishi shart (hech qanday qo'shimcha matnlarsiz):
 
 Kutilayotgan JSON Strukturasi:
 {

@@ -26,14 +26,17 @@ export async function POST(request: Request) {
     }
 
     const prompt = `
-      Sinf: ${grade}
-      Fan: ${subject}
-      Mavzu: ${topic}
-      Savollar soni: ${questionsCount}
-      Qiyinlik: ${difficulty || "O'rta"}
+      Sen O'zbekiston ta'lim standartlariga mos test tuzuvchi sun'iy intellekt, ya'ni AI Agentisan. Quyidagi shartlar asosida test savollarini tuzib ber:
 
-      Ushbu mavzu bo'yicha ${questionsCount} ta test savolini yaratib ber.
-      Javob faqat JSON bo'lishi kerak. Strukturasi:
+      Fan: ${subject}
+      Sinf: ${grade}
+      Mavzu: ${topic}
+      Savollar soni: ${questionsCount} ta
+      Qiyinlik darajasi: ${difficulty || "O'rta"}
+
+      Har bir savol 4 ta variantli (A, B, C, D) bo'lsin va oxirida to'g'ri javoblari hamda qisqacha izohi ko'rsatilsin.
+      
+      MUHIM: Dastur ishlashi uchun javobing faqat va faqat quyidagi JSON formatida bo'lishi shart. Strukturasi:
       {
         "questions": [
           {

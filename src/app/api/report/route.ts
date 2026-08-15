@@ -23,14 +23,15 @@ export async function POST(request: Request) {
     }
 
     const prompt = `
-      Sen professional maktab o'qituvchisisan. Quyidagi ma'lumotlar asosida dars hisobotini tayyorla.
-      
-      Sinf: ${grade}
-      Fan: ${subject}
-      Mavzu: ${topic}
-      Dars ma'lumoti: ${info}
+      Sen maktab o'qituvchilari uchun avtomatlashtirilgan hisobot tuzuvchi AI agentisan. Taqdim etilgan qisqa ma'lumotlar asosida rasmiy va mukammal dars/sinf hisobotini tuzib ber:
 
-      Javobni strukturaviy JSON formatida qaytar:
+      Sinf va Fan: ${grade} - ${subject}
+      Mavzu / Davr: ${topic}
+      Qisqa ma'lumot (davomat, yutuq va muammolar): ${info}
+
+      Hisobot rasmiy uslubda, o'qituvchi va maktab rahbariyatiga taqdim etishga tayyor holatda, o'zbek tilida shakllantirilsin.
+
+      MUHIM: Dastur interfeysi ishlashi uchun javobni aynan quyidagi JSON formatida qaytarishing shart:
       {
         "attendance": "Davomat xulosasi",
         "performance": "O'zlashtirish xulosasi",
