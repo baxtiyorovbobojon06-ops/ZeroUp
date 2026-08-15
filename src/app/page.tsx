@@ -12,6 +12,40 @@ export default function Home() {
   const [hasUnread, setHasUnread] = useState(true);
   const { notificationsEnabled, notificationsMuted } = useSettings();
 
+  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
+
+  const statsData = {
+    week: {
+      lessons: 3,
+      tests: 2,
+      checked: 45,
+      reports: 1,
+      avg: 74,
+      high: 92,
+      low: 50
+    },
+    month: {
+      lessons: 12,
+      tests: 8,
+      checked: 153,
+      reports: 4,
+      avg: 78,
+      high: 96,
+      low: 45
+    },
+    year: {
+      lessons: 145,
+      tests: 90,
+      checked: 1850,
+      reports: 42,
+      avg: 82,
+      high: 100,
+      low: 55
+    }
+  };
+
+  const currentStats = statsData[timeRange];
+
   const handleOpenNotifications = () => {
     setIsNotificationsOpen(true);
     setHasUnread(false);
@@ -147,9 +181,18 @@ export default function Home() {
         <div className="bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Tezkor statistika</h2>
-            <button className="flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
-              Bu oy <ChevronDown className="w-4 h-4" />
-            </button>
+            <div className="relative">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value as 'week' | 'month' | 'year')}
+                className="appearance-none bg-white dark:bg-slate-800 flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-1.5 pl-3 pr-8 rounded-lg cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500/20 hover:border-slate-300 dark:hover:border-slate-600 transition-colors shadow-sm"
+              >
+                <option value="week">Bu hafta</option>
+                <option value="month">Bu oy</option>
+                <option value="year">Bu yil</option>
+              </select>
+              <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+            </div>
           </div>
 
           {/* 4 Mini Cards */}
@@ -158,7 +201,7 @@ export default function Home() {
               <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 rounded-lg flex items-center justify-center mb-3">
                 <BookOpen className="w-4 h-4" />
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1">12</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1 transition-all duration-300">{currentStats.lessons}</p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Dars rejalari</p>
             </div>
             
@@ -166,7 +209,7 @@ export default function Home() {
               <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 rounded-lg flex items-center justify-center mb-3">
                 <FileText className="w-4 h-4" />
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1">8</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1 transition-all duration-300">{currentStats.tests}</p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Yaratilgan testlar</p>
             </div>
 
@@ -174,7 +217,7 @@ export default function Home() {
               <div className="w-8 h-8 bg-blue-50 dark:bg-blue-900/30 text-blue-500 rounded-lg flex items-center justify-center mb-3">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1">153</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1 transition-all duration-300">{currentStats.checked}</p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Tekshirilgan javoblar</p>
             </div>
 
@@ -182,7 +225,7 @@ export default function Home() {
               <div className="w-8 h-8 bg-orange-50 dark:bg-orange-900/30 text-orange-500 rounded-lg flex items-center justify-center mb-3">
                 <BarChart2 className="w-4 h-4" />
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1">4</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white mb-1 transition-all duration-300">{currentStats.reports}</p>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Yaratilgan hisobotlar</p>
             </div>
           </div>
@@ -192,17 +235,17 @@ export default function Home() {
             <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">O'quvchilar bo'yicha umumiy</h3>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">O'rtacha natija</span>
-              <span className="text-sm font-bold text-slate-900 dark:text-white">78%</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-white transition-all duration-300">{currentStats.avg}%</span>
             </div>
             
             {/* Progress Bar Container */}
             <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden mb-3">
-              <div className="h-full bg-emerald-500 rounded-full" style={{ width: '78%' }}></div>
+              <div className="h-full bg-emerald-500 rounded-full transition-all duration-700 ease-out" style={{ width: `${currentStats.avg}%` }}></div>
             </div>
 
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Eng yuqori: <span className="text-emerald-500 font-bold">96%</span></span>
-              <span className="text-slate-500 dark:text-slate-400 font-medium">Eng past: <span className="text-rose-500 font-bold">45%</span></span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Eng yuqori: <span className="text-emerald-500 font-bold transition-all duration-300">{currentStats.high}%</span></span>
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Eng past: <span className="text-rose-500 font-bold transition-all duration-300">{currentStats.low}%</span></span>
             </div>
           </div>
 
