@@ -1,40 +1,36 @@
-import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { google } from '@ai-sdk/google';
+import { streamObject } from 'ai';
+import { z } from 'zod';
 import mammoth from 'mammoth';
 
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    
-    const grade = formData.get('grade') as string;
-    const subject = formData.get('subject') as string;
-    const topic = formData.get('topic') as string;
-    const duration = formData.get('duration') as string;
-    const file = formData.get('file') as File | null;
+    const body = await request.json();
+    const { grade, subject, topic, duration, fileData } = body;
 
     if (!grade || !subject || !topic || !duration) {
-      return NextResponse.json({ error: "Barcha asosiy maydonlarni to'ldiring" }, { status: 400 });
+      return new Response(JSON.stringify({ error: "Barcha asosiy maydonlarni to'ldiring" }), { status: 400 });
     }
 
     if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: "API kalit o'rnatilmagan" }, { status: 500 });
+      return new Response(JSON.stringify({ error: "API kalit o'rnatilmagan" }), { status: 500 });
     }
 
-    let inlineData = null;
+    let parsedFileData: { data: string; mimeType: string } | null = null;
     let extractedText = "";
 
-    if (file) {
-      const bytes = await file.arrayBuffer();
-      const mimeType = file.type;
+    if (fileData) {
+      const { data, mimeType, name } = fileData;
+      const buffer = Buffer.from(data, 'base64');
 
-      if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.endsWith('.docx')) {
-        const result = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
+      if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || (name && name.endsWith('.docx'))) {
+        const result = await mammoth.extractRawText({ buffer });
         extractedText = result.value;
       } else if (mimeType === 'application/pdf' || mimeType.startsWith('image/')) {
-        inlineData = {
-          data: Buffer.from(bytes).toString('base64'),
+        parsedFileData = {
+          data: data,
           mimeType: mimeType
         };
       }
@@ -55,75 +51,52 @@ Dars rejasi quyidagi qismlardan iborat bo'lsin:
 - Mustahkamlash uchun savollar va topshiriqlar.
 - Uyga vazifa.
 
-Javobni aniq, o'qishga qulay va o'zbek tilida taqdim et. MUHIM: Tizim to'g'ri ishlashi uchun javobing FAQAT quyidagi aniq JSON formatida bo'lishi shart (hech qanday qo'shimcha matnlarsiz):
-
-Kutilayotgan JSON Strukturasi:
-{
-  "title": "Mavzu nomi",
-  "image_prompt": "A detailed descriptive prompt in ENGLISH for generating an image related to this specific topic. Example: 'A beautiful realistic photo of students learning about computer hardware, glowing motherboard, futuristic classroom, 8k resolution, cinematic lighting'.",
-  "objectives": [
-    "Maqsad 1 (Ta'limiy - bilish)", 
-    "Maqsad 2 (Tarbiyaviy - his qilish)", 
-    "Maqsad 3 (Rivojlantiruvchi - qo'llash)"
-  ],
-  "resources": ["Kitob", "Proyektor", "Xarita kabi darsga kerakli anjomlar va ko'rgazmalar"],
-  "phases": [
-    {
-      "phase_name": "Tashkiliy qism va Motivatsiya",
-      "duration": 5,
-      "teacher_action": "O'qituvchi nima qiladi va darsga qanday qiziqtiradi (aniq harakatlar)",
-      "student_action": "O'quvchilar nima qiladi va qanday javob qaytaradi"
-    },
-    {
-      "phase_name": "Yangi mavzu bayoni (Muammoli vaziyat)",
-      "duration": 15,
-      "teacher_action": "O'qituvchi mavzuni qanday qiziqarli usulda tushuntiradi",
-      "student_action": "O'quvchilar ishtiroki"
-    },
-    {
-      "phase_name": "Mustahkamlash (Interaktiv o'yin yoki guruh ishi)",
-      "duration": 15,
-      "teacher_action": "Qanday o'yin yoki mashq o'tkaziladi",
-      "student_action": "O'quvchilar qanday bajaradi"
-    },
-    {
-      "phase_name": "Yakunlash va Refleksiya",
-      "duration": 10,
-      "teacher_action": "Dars qanday yakunlanadi, Qanday xulosa qilinadi",
-      "student_action": "O'quvchilar fikri"
-    }
-  ],
-  "assessment": "O'quvchilarni baholash mezoni va usuli (masalan: guruh ishi uchun 5 ball, faollik uchun...)",
-  "homework": "Uyga vazifa (ijodiy, izlanish talab qiladigan va qiziqarli)",
-  "quiz": [
-    {
-      "question": "Mavzu bo'yicha test savoli (jami 10 ta shunday savol bo'lishi shart)",
-      "options": ["A variant", "B variant", "C variant", "D variant"],
-      "correct_answer": "To'g'ri variant matni"
-    }
-  ]
-}
+Javobni aniq, o'qishga qulay va o'zbek tilida taqdim et.
     `;
 
-    const parts = [];
-    if (inlineData) {
-      parts.push({ inlineData });
-    }
-    parts.push(promptText);
-
-    const response = await genAI.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: parts,
-      config: { responseMimeType: "application/json" }
+    const schema = z.object({
+      title: z.string().describe("Mavzu nomi"),
+      image_prompt: z.string().optional().describe("A detailed descriptive prompt in ENGLISH for generating an image related to this specific topic."),
+      objectives: z.array(z.string()).describe("Dars maqsadlari ro'yxati"),
+      resources: z.array(z.string()).describe("Kerakli jihozlar va resurslar"),
+      phases: z.array(z.object({
+        phase_name: z.string(),
+        duration: z.number(),
+        teacher_action: z.string(),
+        student_action: z.string()
+      })).describe("Dars bosqichlari"),
+      assessment: z.string().describe("Baholash usuli"),
+      homework: z.string().describe("Uyga vazifa"),
+      quiz: z.array(z.object({
+        question: z.string(),
+        options: z.array(z.string()),
+        correct_answer: z.string()
+      })).describe("Kamida 10 ta test savoli")
     });
 
-    const content = response.text;
-    if (!content) throw new Error("No content received from Gemini");
+    const messages: any[] = [
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: promptText },
+          ...(parsedFileData ? [{ 
+            type: parsedFileData.mimeType.startsWith('image/') ? 'image' : 'file', 
+            ...(parsedFileData.mimeType.startsWith('image/') ? { image: parsedFileData.data } : { data: parsedFileData.data, mimeType: parsedFileData.mimeType })
+          }] : [])
+        ]
+      }
+    ];
 
-    return NextResponse.json(JSON.parse(content));
+    const result = await streamObject({
+      model: google('gemini-3.5-flash'),
+      schema: schema,
+      messages: messages,
+    });
+
+    return result.toTextStreamResponse();
 
   } catch (error: any) {
     console.error("Lesson Planner API error:", error);
-    return NextResponse.json({ error: "Dars rejasini yaratishda xatolik yuz berdi.", details: error.message }, { status: 500 });
+    return new Response(JSON.stringify({ error: "Dars rejasini yaratishda xatolik yuz berdi.", details: error.message }), { status: 500 });
   }
 }
