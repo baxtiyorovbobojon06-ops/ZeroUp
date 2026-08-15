@@ -6,6 +6,8 @@ import { useState } from "react";
 import { NotificationsDrawer } from "@/components/NotificationsDrawer";
 import { useSettings } from "@/contexts/SettingsContext";
 
+import { mockTests } from "@/data/mockTests";
+
 export default function Home() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(true);
@@ -130,25 +132,18 @@ export default function Home() {
 
       {/* Bottom Row: Recent Activity History */}
       <div>
-        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">Oxirgi Faoliyatlar Tarixi</h2>
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-4">Oxirgi Yaratilgan Testlar</h2>
         <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-white/60 dark:border-slate-700/60 p-6 rounded-3xl shadow-sm">
           <ul className="space-y-4 text-slate-700 dark:text-slate-300 font-medium">
-            <li className="flex items-center gap-3">
-              <span className="text-slate-400">1.</span>
-              <span>8-B Biologiya - Yurak tuzilishi (2 soat oldin)</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="text-slate-400">2.</span>
-              <span>9-A Fizika - Elektr zanjiri (5 soat oldin)</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="text-slate-400">3.</span>
-              <span>7-C Matematika - Qisqa ko'paytirish formulalari (1 kun oldin)</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <span className="text-slate-400">4.</span>
-              <span>10-A Tarix - Ikkinchi jahon urushi (2 kun oldin)</span>
-            </li>
+            {mockTests.map((test, index) => (
+              <li key={test.id} className="group">
+                <Link href={`/saved-tests/${test.id}`} className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                  <span className="text-slate-400 min-w-[24px]">{index + 1}.</span>
+                  <span className="flex-1">{test.grade} {test.subject} - {test.title}</span>
+                  <span className="text-sm text-slate-400">{test.timeAgo}</span>
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
