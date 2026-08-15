@@ -2,6 +2,7 @@
 
 import { X, Bell, CheckCircle2, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSettings } from "@/contexts/SettingsContext";
 
 interface NotificationsDrawerProps {
@@ -47,7 +48,7 @@ export function NotificationsDrawer({ isOpen, onClose }: NotificationsDrawerProp
     }
   ];
 
-  return (
+  return createPortal(
     <>
       {/* Overlay */}
       <div 
@@ -131,6 +132,7 @@ export function NotificationsDrawer({ isOpen, onClose }: NotificationsDrawerProp
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
