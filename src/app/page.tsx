@@ -25,12 +25,19 @@ export default function Home() {
 
         <button 
           onClick={() => setIsNotificationsOpen(true)}
-          className="relative p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/60 dark:border-slate-700/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all rounded-2xl text-slate-600 dark:text-slate-300 group"
+          className="flex items-center gap-3 group"
         >
-          <Bell className="w-6 h-6 group-hover:text-rose-500 transition-colors" />
           {notificationsEnabled && (
-            <span className="absolute top-2 right-2 w-3 h-3 bg-rose-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
+            <div className="hidden sm:flex items-center bg-rose-50/80 dark:bg-rose-900/20 text-rose-600 dark:text-rose-300 px-4 py-2.5 rounded-2xl border border-rose-100 dark:border-rose-800/30 shadow-sm group-hover:-translate-y-1 transition-all">
+              <span className="text-sm font-medium truncate max-w-[200px]">
+                Yangi: Test javoblari tekshirildi...
+              </span>
+            </div>
           )}
+          
+          <div className="p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/60 dark:border-slate-700/60 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all rounded-2xl text-slate-600 dark:text-slate-300">
+            <Bell className="w-6 h-6 group-hover:text-rose-500 transition-colors" />
+          </div>
         </button>
       </div>
 
