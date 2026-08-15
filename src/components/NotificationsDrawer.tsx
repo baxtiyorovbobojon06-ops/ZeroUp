@@ -10,7 +10,7 @@ interface NotificationsDrawerProps {
 }
 
 export function NotificationsDrawer({ isOpen, onClose }: NotificationsDrawerProps) {
-  const { notificationsEnabled, t } = useSettings();
+  const { notificationsEnabled, notificationsMuted, t } = useSettings();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
