@@ -1,12 +1,37 @@
+"use client";
+
 import Link from "next/link";
-import { BookOpen, FileSignature, CheckSquare, FileBarChart } from "lucide-react";
+import { BookOpen, FileSignature, CheckSquare, FileBarChart, Bell } from "lucide-react";
+import { useState } from "react";
+import { NotificationsDrawer } from "@/components/NotificationsDrawer";
+import { useSettings } from "@/contexts/SettingsContext";
 
 export default function Home() {
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { notificationsEnabled } = useSettings();
+
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Salom, O'qituvchi! 👋</h1>
-        <p className="text-slate-500 mt-2 text-lg">Bugun qanday ishlarni avtomatlashtiramiz?</p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out relative">
+      <NotificationsDrawer 
+        isOpen={isNotificationsOpen} 
+        onClose={() => setIsNotificationsOpen(false)} 
+      />
+
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Salom, O'qituvchi! 👋</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">Bugun qanday ishlarni avtomatlashtiramiz?</p>
+        </div>
+
+        <button 
+          onClick={() => setIsNotificationsOpen(true)}
+          className="relative p-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/60 dark:border-slate-700/60 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all rounded-2xl text-slate-600 dark:text-slate-300 group"
+        >
+          <Bell className="w-6 h-6 group-hover:text-rose-500 transition-colors" />
+          {notificationsEnabled && (
+            <span className="absolute top-2 right-2 w-3 h-3 bg-rose-500 rounded-full border-2 border-white dark:border-slate-800 animate-pulse"></span>
+          )}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
