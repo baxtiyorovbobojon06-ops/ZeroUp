@@ -16,12 +16,17 @@ type ViewState = 'main' | 'system' | 'language' | 'profile' | 'notifications';
 
 export default function SettingsPage() {
   const { 
-    theme, language, fontSize, fontFamily, profileName, notificationsEnabled,
-    setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, t 
+    theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted,
+    setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted, t 
   } = useSettings();
   
   const [currentView, setCurrentView] = useState<ViewState>('main');
   const [tempName, setTempName] = useState(profileName);
+  
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    type: 'panel' | 'mute' | null;
+  }>({ isOpen: false, type: null });
 
   const handleSaveProfile = () => {
     if (tempName.trim().length === 0) {
@@ -358,8 +363,10 @@ export default function SettingsPage() {
               
               <button 
                 onClick={() => {
-                  setNotificationsEnabled(!notificationsEnabled);
-                  if (!notificationsEnabled) {
+                  if (notificationsEnabled) {
+                    setConfirmModal({ isOpen: true, type: 'panel' });
+                  } else {
+                    setNotificationsEnabled(true);
                     toast.success(t("saved_msg"));
                   }
                 }}
@@ -368,9 +375,70 @@ export default function SettingsPage() {
                 <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${notificationsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
             </div>
+
+            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl">
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-slate-100">Ovozsizlantirish (Mute)</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Bildirishnomalar kelganda ovoz chiqarmaslik</p>
+              </div>
+              
+              <button 
+                onClick={() => {
+                  if (!notificationsMuted) {
+                    setConfirmModal({ isOpen: true, type: 'mute' });
+                  } else {
+                    setNotificationsMuted(false);
+                    toast.success(t("saved_msg"));
+                  }
+                }}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${notificationsMuted ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+              >
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${notificationsMuted ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
           </div>
         </div>
       </Card>
+
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 dark:bg-slate-900/60 backdrop-blur-sm px-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
+                Diqqat
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+                {confirmModal.type === 'panel' 
+                  ? "Haqiqatan ham panelni o'chirasizmi?" 
+                  : "Sizga yangi habarlar va ilova haqidagi yangiliklar kelishini o'tkazib yuborishingiz mumkin. Haqiqatan ham ovozsizlantirasizmi?"}
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setConfirmModal({ isOpen: false, type: null })}
+                  className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                >
+                  Yo'q
+                </button>
+                <button 
+                  onClick={() => {
+                    if (confirmModal.type === 'panel') {
+                      setNotificationsEnabled(false);
+                    } else if (confirmModal.type === 'mute') {
+                      setNotificationsMuted(true);
+                    }
+                    toast.success(t("saved_msg"));
+                    setConfirmModal({ isOpen: false, type: null });
+                  }}
+                  className={`flex-1 px-4 py-2 text-white rounded-xl font-medium transition-colors ${confirmModal.type === 'panel' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-amber-500 hover:bg-amber-600'}`}
+                >
+                  Ha, o'chirish
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 

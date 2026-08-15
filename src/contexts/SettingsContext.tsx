@@ -14,12 +14,14 @@ interface SettingsContextType {
   fontFamily: FontFamily;
   profileName: string;
   notificationsEnabled: boolean;
+  notificationsMuted: boolean;
   setTheme: (t: Theme) => void;
   setLanguage: (l: Language) => void;
   setFontSize: (s: FontSize) => void;
   setFontFamily: (f: FontFamily) => void;
   setProfileName: (n: string) => void;
   setNotificationsEnabled: (n: boolean) => void;
+  setNotificationsMuted: (m: boolean) => void;
   t: (key: string) => string;
 }
 
@@ -32,6 +34,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [fontFamily, setFontFamilyState] = useState<FontFamily>('inter');
   const [profileName, setProfileNameState] = useState<string>("O'qituvchi");
   const [notificationsEnabled, setNotificationsState] = useState<boolean>(true);
+  const [notificationsMuted, setNotificationsMutedState] = useState<boolean>(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -42,6 +45,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedFont = localStorage.getItem('fontFamily') as FontFamily;
     const savedName = localStorage.getItem('profileName');
     const savedNotifications = localStorage.getItem('notificationsEnabled');
+    const savedMuted = localStorage.getItem('notificationsMuted');
 
     if (savedTheme) setThemeState(savedTheme);
     if (savedLang) setLanguageState(savedLang);
@@ -49,6 +53,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (savedFont) setFontFamilyState(savedFont);
     if (savedName) setProfileNameState(savedName);
     if (savedNotifications !== null) setNotificationsState(savedNotifications === 'true');
+    if (savedMuted !== null) setNotificationsMutedState(savedMuted === 'true');
     
     setIsLoaded(true);
   }, []);
@@ -94,14 +99,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (isLoaded) localStorage.setItem('notificationsEnabled', enabled.toString());
   };
 
+  const setNotificationsMuted = (muted: boolean) => {
+    setNotificationsMutedState(muted);
+    if (isLoaded) localStorage.setItem('notificationsMuted', muted.toString());
+  };
+
   const t = (key: string): string => {
     return translations[language][key] || key;
   };
 
   return (
     <SettingsContext.Provider value={{ 
-      theme, language, fontSize, fontFamily, profileName, notificationsEnabled,
-      setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, t 
+      theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted,
+      setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted, t 
     }}>
       {children}
     </SettingsContext.Provider>
