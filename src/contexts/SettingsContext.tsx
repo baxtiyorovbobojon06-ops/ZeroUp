@@ -13,11 +13,13 @@ interface SettingsContextType {
   fontSize: FontSize;
   fontFamily: FontFamily;
   profileName: string;
+  notificationsEnabled: boolean;
   setTheme: (t: Theme) => void;
   setLanguage: (l: Language) => void;
   setFontSize: (s: FontSize) => void;
   setFontFamily: (f: FontFamily) => void;
   setProfileName: (n: string) => void;
+  setNotificationsEnabled: (n: boolean) => void;
   t: (key: string) => string;
 }
 
@@ -29,6 +31,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [fontSize, setFontSizeState] = useState<FontSize>('base');
   const [fontFamily, setFontFamilyState] = useState<FontFamily>('inter');
   const [profileName, setProfileNameState] = useState<string>("O'qituvchi");
+  const [notificationsEnabled, setNotificationsState] = useState<boolean>(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -38,12 +41,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedSize = localStorage.getItem('fontSize') as FontSize;
     const savedFont = localStorage.getItem('fontFamily') as FontFamily;
     const savedName = localStorage.getItem('profileName');
+    const savedNotifications = localStorage.getItem('notificationsEnabled');
 
     if (savedTheme) setThemeState(savedTheme);
     if (savedLang) setLanguageState(savedLang);
     if (savedSize) setFontSizeState(savedSize);
     if (savedFont) setFontFamilyState(savedFont);
     if (savedName) setProfileNameState(savedName);
+    if (savedNotifications !== null) setNotificationsState(savedNotifications === 'true');
     
     setIsLoaded(true);
   }, []);
@@ -84,14 +89,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (isLoaded) localStorage.setItem('profileName', newName);
   };
 
+  const setNotificationsEnabled = (enabled: boolean) => {
+    setNotificationsState(enabled);
+    if (isLoaded) localStorage.setItem('notificationsEnabled', enabled.toString());
+  };
+
   const t = (key: string): string => {
     return translations[language][key] || key;
   };
 
   return (
     <SettingsContext.Provider value={{ 
-      theme, language, fontSize, fontFamily, profileName, 
-      setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, t 
+      theme, language, fontSize, fontFamily, profileName, notificationsEnabled,
+      setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, t 
     }}>
       {children}
     </SettingsContext.Provider>

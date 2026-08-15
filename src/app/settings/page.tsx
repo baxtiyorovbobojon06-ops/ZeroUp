@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Moon, Sun, Globe, User, Save, Type, Monitor, ChevronRight, ChevronLeft, Check } from "lucide-react";
+import { Settings, Moon, Sun, Globe, User, Save, Type, Monitor, ChevronRight, ChevronLeft, Check, Bell } from "lucide-react";
 import toast from "react-hot-toast";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Language } from "@/utils/translations";
@@ -12,12 +12,12 @@ import { Button } from "@/components/ui/Button";
 type FontSize = 'sm' | 'base' | 'lg';
 type FontFamily = 'inter' | 'roboto' | 'nunito';
 
-type ViewState = 'main' | 'system' | 'language' | 'profile';
+type ViewState = 'main' | 'system' | 'language' | 'profile' | 'notifications';
 
 export default function SettingsPage() {
   const { 
-    theme, language, fontSize, fontFamily, profileName, 
-    setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, t 
+    theme, language, fontSize, fontFamily, profileName, notificationsEnabled,
+    setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, t 
   } = useSettings();
   
   const [currentView, setCurrentView] = useState<ViewState>('main');
@@ -80,6 +80,25 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
             <span className="text-sm font-medium">
               {language === 'uz' ? "O'zbekcha" : language === 'ru' ? "Русский" : "English"}
+            </span>
+            <ChevronRight className="w-5 h-5" />
+          </div>
+        </button>
+
+        {/* Notifications List Item */}
+        <button 
+          onClick={() => setCurrentView('notifications')}
+          className="w-full flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group text-left"
+        >
+          <div className="p-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl shadow-[0_0_15px_rgba(243,24,125,0.4)] dark:shadow-[0_0_15px_rgba(243,24,125,0.2)] shrink-0 group-hover:scale-105 transition-transform">
+            <Bell className="w-6 h-6" />
+          </div>
+          <div className="ml-4 flex-1">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{t("notifications_title")}</h3>
+          </div>
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+            <span className="text-sm font-medium">
+              {notificationsEnabled ? "Yoqilgan" : "O'chirilgan"}
             </span>
             <ChevronRight className="w-5 h-5" />
           </div>
@@ -309,6 +328,52 @@ export default function SettingsPage() {
     </div>
   );
 
+  const renderNotificationsView = () => (
+    <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+      <div className="flex items-center gap-3 mb-6">
+        <button 
+          onClick={() => setCurrentView('main')}
+          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{t("notifications_title")}</h2>
+      </div>
+
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60">
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl shadow-[0_0_15px_rgba(243,24,125,0.4)] dark:shadow-[0_0_15px_rgba(243,24,125,0.2)] shrink-0">
+            <Bell className="w-6 h-6" />
+          </div>
+          <div className="flex-1 space-y-4">
+            <div>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("notifications_desc")}</p>
+            </div>
+            
+            <div className="flex items-center justify-between p-4 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl">
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-slate-100">{t("notifications_enable")}</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t("notifications_enable_desc")}</p>
+              </div>
+              
+              <button 
+                onClick={() => {
+                  setNotificationsEnabled(!notificationsEnabled);
+                  if (!notificationsEnabled) {
+                    toast.success(t("saved_msg"));
+                  }
+                }}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${notificationsEnabled ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+              >
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${notificationsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+
   return (
     <div className="max-w-2xl mx-auto py-4">
       {/* Header, only show if in main view to save space, or keep it always? */}
@@ -328,6 +393,7 @@ export default function SettingsPage() {
       {currentView === 'system' && renderSystemView()}
       {currentView === 'language' && renderLanguageView()}
       {currentView === 'profile' && renderProfileView()}
+      {currentView === 'notifications' && renderNotificationsView()}
     </div>
   );
 }
