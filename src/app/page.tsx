@@ -9,7 +9,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 export default function Home() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(true);
-  const { notificationsEnabled } = useSettings();
+  const { notificationsEnabled, notificationsMuted } = useSettings();
 
   const handleOpenNotifications = () => {
     setIsNotificationsOpen(true);
@@ -33,7 +33,7 @@ export default function Home() {
           onClick={handleOpenNotifications}
           className="flex items-center gap-3 group"
         >
-          {notificationsEnabled && hasUnread && (
+          {notificationsEnabled && !notificationsMuted && hasUnread && (
             <div className="hidden sm:flex items-center bg-rose-50/80 dark:bg-rose-900/20 text-rose-600 dark:text-rose-300 px-4 py-2.5 rounded-2xl border border-rose-100 dark:border-rose-800/30 shadow-sm group-hover:-translate-y-1 transition-all">
               <span className="text-sm font-medium truncate max-w-[200px]">
                 Yangi: Test javoblari tekshirildi...

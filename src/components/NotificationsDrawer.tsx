@@ -79,45 +79,56 @@ export function NotificationsDrawer({ isOpen, onClose }: NotificationsDrawerProp
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {!notificationsEnabled ? (
-            <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
-              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center justify-center">
-                <Bell className="w-8 h-8 opacity-50" />
+          <div className="space-y-4">
+            
+            {/* Warning Banners */}
+            {!notificationsEnabled && (
+              <div className="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-300 rounded-2xl border border-rose-100 dark:border-rose-800/30 flex items-start gap-3">
+                <Bell className="w-5 h-5 mt-0.5 opacity-70" />
+                <div>
+                  <h4 className="font-semibold text-sm">Bildirishnomalar panelini o'chirib qo'ydingiz</h4>
+                  <p className="text-xs opacity-80 mt-1">Sizga endi xabarlar kelmaydi, bu yerda faqat eski xabarlarni ko'rishingiz mumkin.</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">Bildirishnomalar o'chirilgan</h3>
-                <p className="text-slate-500 dark:text-slate-400 max-w-xs">Sozlamalar bo'limidan bildirishnomalarni yoqib qo'yishingiz mumkin.</p>
+            )}
+
+            {notificationsEnabled && notificationsMuted && (
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-300 rounded-2xl border border-amber-100 dark:border-amber-800/30 flex items-start gap-3">
+                <Bell className="w-5 h-5 mt-0.5 opacity-70" />
+                <div>
+                  <h4 className="font-semibold text-sm">Ovozsizlantirildi</h4>
+                  <p className="text-xs opacity-80 mt-1">Yangi xabarlar kelaveradi, ammo ekraningizda ogohlantirish sifatida chiqmaydi.</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {notifications.map((notif) => (
-                <div 
-                  key={notif.id}
-                  className={`p-4 rounded-2xl border transition-all ${notif.unread ? 'bg-white dark:bg-slate-800 border-rose-100 dark:border-rose-900/50 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800'}`}
-                >
-                  <div className="flex gap-4">
-                    <div className="mt-1 shrink-0">
-                      {notif.icon}
+            )}
+
+            {/* Notifications List */}
+            {notifications.map((notif) => (
+              <div 
+                key={notif.id}
+                className={`p-4 rounded-2xl border transition-all ${notif.unread ? 'bg-white dark:bg-slate-800 border-rose-100 dark:border-rose-900/50 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800'}`}
+              >
+                <div className="flex gap-4">
+                  <div className="mt-1 shrink-0">
+                    {notif.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <h4 className={`font-semibold ${notif.unread ? 'text-slate-900 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                        {notif.title}
+                      </h4>
+                      <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
+                        {notif.time}
+                      </span>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h4 className={`font-semibold ${notif.unread ? 'text-slate-900 dark:text-slate-100' : 'text-slate-700 dark:text-slate-300'}`}>
-                          {notif.title}
-                        </h4>
-                        <span className="text-xs font-medium text-slate-400 whitespace-nowrap">
-                          {notif.time}
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                        {notif.message}
-                      </p>
-                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                      {notif.message}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>
