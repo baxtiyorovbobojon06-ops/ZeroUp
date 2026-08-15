@@ -88,7 +88,7 @@ Javobni aniq, o'qishga qulay va o'zbek tilida taqdim et.
     ];
 
     const result = await streamObject({
-      model: google('gemini-3.5-flash'),
+      model: google('gemini-1.5-flash'),
       schema: schema,
       messages: messages,
     });
