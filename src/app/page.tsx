@@ -124,7 +124,7 @@ export default function Home() {
           <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">So'nggi faoliyatlar</h2>
           
           <div className="flex-1 space-y-4">
-            {mockTests.slice(0, 4).map((test) => (
+            {mockTests.map((test) => (
               <Link key={test.id} href={`/saved-tests/${test.id}`} className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 p-1 -m-1 rounded-xl transition-colors">
                 <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 rounded-xl flex items-center justify-center shrink-0">
                   <FileText className="w-5 h-5" />
@@ -140,12 +140,6 @@ export default function Home() {
                 </span>
               </Link>
             ))}
-          </div>
-          
-          <div className="mt-6 text-center">
-            <Link href="#" className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm flex items-center justify-center gap-1 hover:underline">
-              Barchasini ko'rish <ArrowRight className="w-4 h-4" />
-            </Link>
           </div>
         </div>
 
