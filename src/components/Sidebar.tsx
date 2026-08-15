@@ -9,10 +9,12 @@ import {
   FileSignature, 
   CheckSquare, 
   FileBarChart,
+  Settings,
   Sparkles,
   Menu,
   X
 } from "lucide-react";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const navItems = [
   { name: "Asosiy", href: "/", icon: LayoutDashboard },
@@ -20,11 +22,13 @@ const navItems = [
   { name: "Testlar", href: "/test-generator", icon: FileSignature },
   { name: "Tekshirish", href: "/grader", icon: CheckSquare },
   { name: "Hisobot", href: "/report", icon: FileBarChart },
+  { name: "Sozlanmalar", href: "/settings", icon: Settings },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { profileName, t } = useSettings();
 
   return (
     <>
@@ -88,25 +92,27 @@ export default function Sidebar() {
                 {isActive && (
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-600 rounded-r-full shadow-glow"></div>
                 )}
-                <div className={`p-2 rounded-xl transition-colors duration-300 ${isActive ? 'bg-violet-100/80 text-violet-600 shadow-sm' : 'bg-slate-100/50 text-slate-400 group-hover:bg-slate-200/50'}`}>
+                <div className={`p-2 rounded-xl transition-colors duration-300 ${isActive ? 'bg-violet-100/80 text-violet-600 shadow-sm' : 'bg-slate-100/50 text-slate-400 group-hover:bg-slate-200/50 dark:bg-slate-800/50 dark:group-hover:bg-slate-700/50'}`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                {item.name}
+                {t(item.name)}
               </Link>
             );
           })}
         </nav>
         
-        <div className="p-6 border-t border-white/40 bg-white/30 backdrop-blur-md">
-          <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/50 border border-white/60 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center border border-white/80 shadow-inner group-hover:scale-105 transition-transform">
-              <span className="text-sm font-bold text-violet-700">O'</span>
+        <div className="p-6 border-t border-white/40 dark:border-slate-700/40 bg-white/30 dark:bg-slate-800/30 backdrop-blur-md">
+          <Link href="/settings" className="flex items-center gap-3 p-3 rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-white/60 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center border border-white/80 shadow-inner group-hover:scale-105 transition-transform shrink-0">
+              <span className="text-sm font-bold text-violet-700">
+                {profileName ? profileName.charAt(0).toUpperCase() : "O'"}
+              </span>
             </div>
-            <div>
-              <p className="text-sm font-bold text-slate-800">O'qituvchi</p>
-              <p className="text-xs font-semibold text-violet-600 tracking-wide">PRO TARIF</p>
+            <div className="overflow-hidden">
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{profileName || "O'qituvchi"}</p>
+              <p className="text-xs font-semibold text-violet-600 dark:text-violet-400 tracking-wide">{t("PRO TARIF")}</p>
             </div>
-          </div>
+          </Link>
         </div>
       </aside>
     </>
