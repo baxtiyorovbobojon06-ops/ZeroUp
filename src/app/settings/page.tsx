@@ -364,15 +364,17 @@ export default function SettingsPage() {
               <button 
                 onClick={() => {
                   if (notificationsEnabled) {
+                    // It is currently enabled (disabled switch is OFF). We want to turn it ON (disable the panel).
                     setConfirmModal({ isOpen: true, type: 'panel' });
                   } else {
+                    // It is currently disabled (disabled switch is ON). We want to turn it OFF (enable the panel).
                     setNotificationsEnabled(true);
                     toast.success(t("saved_msg"));
                   }
                 }}
-                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${notificationsEnabled ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${!notificationsEnabled ? 'bg-rose-500' : 'bg-slate-300 dark:bg-slate-600'}`}
               >
-                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${notificationsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${!notificationsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
               </button>
             </div>
 
