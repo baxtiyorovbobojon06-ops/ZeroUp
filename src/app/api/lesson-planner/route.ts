@@ -1,7 +1,11 @@
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 import mammoth from 'mammoth';
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GEMINI_API_KEY || "",
+});
 
 export const maxDuration = 60;
 
@@ -88,7 +92,7 @@ Javobni aniq, o'qishga qulay va o'zbek tilida taqdim et.
     ];
 
     const result = await streamObject({
-      model: google('gemini-1.5-flash'),
+      model: google('gemini-3.5-flash'),
       schema: schema,
       messages: messages,
     });
