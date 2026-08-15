@@ -41,7 +41,7 @@ export default function SettingsPage() {
         {/* Theme Settings */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl">
+            <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.4)] dark:shadow-[0_0_15px_rgba(99,102,241,0.2)]">
               {theme === 'dark' ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
             </div>
             <div className="flex-1 space-y-4">
@@ -78,7 +78,7 @@ export default function SettingsPage() {
         {/* Language Settings */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
+            <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.4)] dark:shadow-[0_0_15px_rgba(16,185,129,0.2)]">
               <Globe className="w-6 h-6" />
             </div>
             <div className="flex-1 space-y-4">
@@ -102,7 +102,7 @@ export default function SettingsPage() {
         {/* Profile Settings */}
         <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60 md:col-span-2">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl">
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.4)] dark:shadow-[0_0_15px_rgba(245,158,11,0.2)]">
               <User className="w-6 h-6" />
             </div>
             <div className="flex-1 space-y-4">

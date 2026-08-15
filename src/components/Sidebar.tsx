@@ -92,10 +92,14 @@ export default function Sidebar() {
                 {isActive && (
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-600 rounded-r-full shadow-glow"></div>
                 )}
-                <div className={`p-2 rounded-xl transition-colors duration-300 ${isActive ? 'bg-violet-100/80 text-violet-600 shadow-sm' : 'bg-slate-100/50 text-slate-400 group-hover:bg-slate-200/50 dark:bg-slate-800/50 dark:group-hover:bg-slate-700/50'}`}>
+                <div className={`p-2.5 rounded-xl transition-all duration-300 ${
+                  isActive 
+                    ? 'bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-[0_0_20px_rgba(139,92,246,0.6)] scale-110' 
+                    : 'bg-white text-slate-500 shadow-sm border border-slate-100 group-hover:bg-violet-50 group-hover:text-violet-600 group-hover:shadow-[0_0_15px_rgba(139,92,246,0.4)] group-hover:border-violet-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700 dark:group-hover:bg-slate-700 dark:group-hover:shadow-[0_0_15px_rgba(139,92,246,0.2)]'
+                }`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                {t(item.name)}
+                <span className={`${isActive ? 'font-bold' : 'font-medium'}`}>{t(item.name)}</span>
               </Link>
             );
           })}
