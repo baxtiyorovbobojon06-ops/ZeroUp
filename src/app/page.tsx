@@ -18,11 +18,12 @@ export default function Home() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out relative pb-8 max-w-[1400px] mx-auto">
+    <>
       <NotificationsDrawer 
         isOpen={isNotificationsOpen} 
         onClose={() => setIsNotificationsOpen(false)} 
       />
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out relative pb-8 max-w-[1400px] mx-auto overflow-hidden">
 
       {/* Header */}
       <div className="flex justify-between items-start mb-10">
@@ -221,5 +222,6 @@ export default function Home() {
       </div>
 
     </div>
+    </>
   );
 }
