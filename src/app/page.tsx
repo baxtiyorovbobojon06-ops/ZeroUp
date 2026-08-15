@@ -8,7 +8,13 @@ import { useSettings } from "@/contexts/SettingsContext";
 
 export default function Home() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
   const { notificationsEnabled } = useSettings();
+
+  const handleOpenNotifications = () => {
+    setIsNotificationsOpen(true);
+    setHasUnread(false);
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out relative">
@@ -24,10 +30,10 @@ export default function Home() {
         </div>
 
         <button 
-          onClick={() => setIsNotificationsOpen(true)}
+          onClick={handleOpenNotifications}
           className="flex items-center gap-3 group"
         >
-          {notificationsEnabled && (
+          {notificationsEnabled && hasUnread && (
             <div className="hidden sm:flex items-center bg-rose-50/80 dark:bg-rose-900/20 text-rose-600 dark:text-rose-300 px-4 py-2.5 rounded-2xl border border-rose-100 dark:border-rose-800/30 shadow-sm group-hover:-translate-y-1 transition-all">
               <span className="text-sm font-medium truncate max-w-[200px]">
                 Yangi: Test javoblari tekshirildi...
