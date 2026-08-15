@@ -7,6 +7,7 @@ export function useHistory<T>(key: string) {
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setHistory(JSON.parse(saved));
       } catch (e) {
         console.error('Failed to parse history', e);

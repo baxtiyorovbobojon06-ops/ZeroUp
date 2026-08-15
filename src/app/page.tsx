@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, BookOpen, CheckCircle2, BarChart2, ArrowRight, FileText, ChevronDown, CheckSquare, Sparkles } from "lucide-react";
+import { Bell, BookOpen, CheckCircle2, BarChart2, ArrowRight, FileText, ChevronDown, CheckSquare, Sparkles, Calendar, CalendarDays, CalendarRange, Clock } from "lucide-react";
 import { useState } from "react";
 import { NotificationsDrawer } from "@/components/NotificationsDrawer";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -12,9 +12,26 @@ export default function Home() {
   const [hasUnread, setHasUnread] = useState(true);
   const { notificationsEnabled, notificationsMuted } = useSettings();
 
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
+  const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>('month');
+  const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
+
+  const timeLabels = {
+    day: 'Bu kun',
+    week: 'Bu hafta',
+    month: 'Bu oy',
+    year: 'Bu yil'
+  };
 
   const statsData = {
+    day: {
+      lessons: 1,
+      tests: 0,
+      checked: 15,
+      reports: 0,
+      avg: 71,
+      high: 88,
+      low: 60
+    },
     week: {
       lessons: 3,
       tests: 2,
@@ -155,7 +172,7 @@ export default function Home() {
         
         {/* Left Column: Recent Activity */}
         <div className="bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">So'nggi faoliyatlar</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">So&apos;nggi faoliyatlar</h2>
           
           <div className="flex-1 space-y-4 overflow-y-auto pr-2 max-h-[310px] custom-scrollbar">
             {mockTests.map((test) => (
@@ -179,19 +196,66 @@ export default function Home() {
 
         {/* Right Column: Quick Statistics */}
         <div className="bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6 relative">
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Tezkor statistika</h2>
+            
             <div className="relative">
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value as 'week' | 'month' | 'year')}
-                className="appearance-none bg-white dark:bg-slate-800 flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-1.5 pl-3 pr-8 rounded-lg cursor-pointer outline-none focus:ring-2 focus:ring-indigo-500/20 hover:border-slate-300 dark:hover:border-slate-600 transition-colors shadow-sm"
+              <button
+                onClick={() => setIsTimeDropdownOpen(!isTimeDropdownOpen)}
+                className="bg-white dark:bg-slate-800 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 py-2 px-4 rounded-xl shadow-sm hover:shadow-md hover:border-violet-300 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/20"
               >
-                <option value="week">Bu hafta</option>
-                <option value="month">Bu oy</option>
-                <option value="year">Bu yil</option>
-              </select>
-              <ChevronDown className="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                <span>{timeLabels[timeRange]}</span>
+                <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform duration-300 ${isTimeDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Custom Dropdown Menu */}
+              {isTimeDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsTimeDropdownOpen(false)}></div>
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-slate-50/90 dark:bg-slate-800/90 backdrop-blur-xl border border-white/60 dark:border-slate-700 shadow-2xl rounded-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex flex-col space-y-1">
+                      {[
+                        { id: 'day', label: 'Bu kun', icon: Clock },
+                        { id: 'week', label: 'Bu hafta', icon: Calendar },
+                        { id: 'month', label: 'Bu oy', icon: CalendarDays },
+                        { id: 'year', label: 'Bu yil', icon: CalendarRange }
+                      ].map((option) => {
+                        const isActive = timeRange === option.id;
+                        const Icon = option.icon;
+                        
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => {
+                              setTimeRange(option.id as 'day' | 'week' | 'month' | 'year');
+                              setIsTimeDropdownOpen(false);
+                            }}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative text-left w-full ${
+                              isActive 
+                                ? "bg-white shadow-sm border border-white/80" 
+                                : "hover:bg-white/50 hover:translate-x-1"
+                            }`}
+                          >
+                            {isActive && (
+                              <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-violet-600 rounded-r-full shadow-glow"></div>
+                            )}
+                            <div className={`p-2 rounded-xl transition-all duration-300 shrink-0 ${
+                              isActive 
+                                ? 'bg-gradient-to-br from-violet-500 to-indigo-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]' 
+                                : 'bg-white text-slate-500 shadow-sm border border-slate-100 group-hover:bg-violet-50 group-hover:text-violet-600 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600'
+                            }`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <span className={`text-sm ${isActive ? 'font-bold text-violet-700 dark:text-violet-400' : 'font-medium text-slate-600 dark:text-slate-400'}`}>
+                              {option.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -232,9 +296,9 @@ export default function Home() {
 
           {/* Overall progress */}
           <div className="mt-auto">
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">O'quvchilar bo'yicha umumiy</h3>
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">O&apos;quvchilar bo&apos;yicha umumiy</h3>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">O'rtacha natija</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400 font-medium">O&apos;rtacha natija</span>
               <span className="text-sm font-bold text-slate-900 dark:text-white transition-all duration-300">{currentStats.avg}%</span>
             </div>
             

@@ -11,10 +11,11 @@ interface NotificationsDrawerProps {
 }
 
 export function NotificationsDrawer({ isOpen, onClose }: NotificationsDrawerProps) {
-  const { notificationsEnabled, notificationsMuted, t } = useSettings();
+  const { notificationsEnabled, notificationsMuted } = useSettings();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -33,7 +34,7 @@ export function NotificationsDrawer({ isOpen, onClose }: NotificationsDrawerProp
     {
       id: 1,
       title: "Test javoblari tekshirildi",
-      message: "8-A sinf o'quvchilarining biologiya fanidan olgan test javoblari to'liq tekshirib bo'lindi. Natijalarni ko'rishingiz mumkin.",
+      message: "8-A sinf o&apos;quvchilarining biologiya fanidan olgan test javoblari to&apos;liq tekshirib bo&apos;lindi. Natijalarni ko&apos;rishingiz mumkin.",
       time: "2 daqiqa oldin",
       icon: <CheckCircle2 className="w-5 h-5 text-emerald-500" />,
       unread: true,
@@ -41,7 +42,7 @@ export function NotificationsDrawer({ isOpen, onClose }: NotificationsDrawerProp
     {
       id: 2,
       title: "Yangi tizim yangilanishi",
-      message: "Dasturga yangi 'Bildirishnomalar' moduli qo'shildi. Endi siz barcha o'zgarishlardan xabardor bo'lasiz.",
+      message: "Dasturga yangi &apos;Bildirishnomalar&apos; moduli qo&apos;shildi. Endi siz barcha o&apos;zgarishlardan xabardor bo&apos;lasiz.",
       time: "1 soat oldin",
       icon: <MessageSquare className="w-5 h-5 text-blue-500" />,
       unread: false,
