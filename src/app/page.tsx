@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Users, FileSignature, CheckSquare, BarChart2, ArrowRight, BookOpen, Clock, Calendar, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { Button } from "@/components/ui/Button";
 
 export default function Home() {
   const { profileName } = useSettings();
