@@ -13,14 +13,17 @@ import {
   Sparkles,
   Menu,
   X,
-  Star
+  Star,
+  Users
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
 const navItems = [
   { name: "Asosiy", href: "/", icon: LayoutDashboard },
+  { name: "Sinflar", href: "/classes", icon: Users },
   { name: "Dars Rejasi", href: "/lesson-planner", icon: BookOpen },
-  { name: "Testlar", href: "/test-generator", icon: FileSignature },
+  { name: "Testlar", href: "/tests", icon: FileSignature },
+  { name: "AI Test Yaratuvchi", href: "/test-generator", icon: FileSignature },
   { name: "Tekshirish", href: "/grader", icon: CheckSquare },
   { name: "Hisobot", href: "/report", icon: FileBarChart },
   { name: "Saqlanganlar", href: "/saved", icon: Star },

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { CheckSquare, Sparkles, AlertCircle, CheckCircle2, Upload, ImageIcon, X, Lightbulb, Users, Image as ImageIcon2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CheckSquare, Upload, ImageIcon, X, AlertCircle, Save, BookOpen, LayoutDashboard } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { experimental_useObject as useObject } from '@ai-sdk/react';
@@ -13,27 +13,62 @@ import { Card } from "@/components/ui/Card";
 const schema = z.object({
   results: z.array(
     z.object({
-      student_name: z.string().describe("O'quvchining ismi yoki Rasm tartib raqami"),
-      score: z.string().describe("Yakuniy baho (masalan 100/100, 5/5, 80%)"),
-      status: z.enum(["To'g'ri", "Xato", "Qisman to'g'ri"]).describe("Javob holati"),
-      mistakes: z.array(z.string()).describe("Xatolar ro'yxati (to'g'ri bo'lsa bo'sh qoldiring)"),
-      feedback: z.string().describe("O'qituvchi tomonidan qisqacha xulosa va tavsiya"),
+      student_name: z.string(),
+      variant: z.string().optional(),
+      score: z.number(),
+      percentage: z.number(),
+      answers: z.array(
+        z.object({
+          question: z.number(),
+          studentAnswer: z.string(),
+          correctAnswer: z.string(),
+          isCorrect: z.boolean(),
+          confidence: z.number()
+        })
+      )
     })
   )
 });
 
 export default function Grader() {
-  const [assignment, setAssignment] = useState("");
+  const [classes, setClasses] = useState<any[]>([]);
+  const [tests, setTests] = useState<any[]>([]);
+  
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [selectedTestId, setSelectedTestId] = useState("");
+  
   const [files, setFiles] = useState<File[]>([]);
+  
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/classes").then(r => r.json()).then(data => {
+      setClasses(data);
+      if (data.length > 0) setSelectedClassId(data[0].id);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (selectedClassId) {
+      fetch(`/api/tests?classId=${selectedClassId}`).then(r => r.json()).then(data => {
+        setTests(data);
+        if (data.length > 0) setSelectedTestId(data[0].id);
+        else setSelectedTestId("");
+      });
+    } else {
+      setTests([]);
+      setSelectedTestId("");
+    }
+  }, [selectedClassId]);
 
   const { object: streamedResult, submit, isLoading, error } = useObject({
     api: '/api/grader',
     schema: schema,
     onFinish: () => {
-      toast.success("Barcha rasmlar tekshirib bo'lindi!");
+      toast.success("Barcha rasmlar tahlil qilindi!");
     },
     onError: () => {
-      toast.error("Tekshirishda xatolik yuz berdi. Yoki rasmlar juda katta.");
+      toast.error("Tekshirishda xatolik yuz berdi. Yoki rasmlar hajmi juda katta.");
     }
   });
 
@@ -64,10 +99,15 @@ export default function Grader() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (files.length === 0) {
-      toast.error("Kamida bitta rasm yuklang!");
-      return;
+    if (!selectedClassId || !selectedTestId) {
+      return toast.error("Sinf va testni tanlang");
     }
+    if (files.length === 0) {
+      return toast.error("Kamida bitta rasm yuklang!");
+    }
+
+    const test = tests.find(t => t.id === selectedTestId);
+    if (!test) return toast.error("Test topilmadi");
 
     toast.loading("Rasmlar bazaga tayyorlanmoqda...", { id: "graderLoad" });
     
@@ -87,7 +127,9 @@ export default function Grader() {
       toast.dismiss("graderLoad");
 
       submit({
-        assignment,
+        testId: selectedTestId,
+        answerKey: test.answerKey,
+        questionCount: test.questionCount,
         images: imagesData
       });
     } catch (err) {
@@ -96,196 +138,229 @@ export default function Grader() {
     }
   };
 
+  const saveResults = async () => {
+    if (!result?.results || result.results.length === 0) return;
+    setIsSaving(true);
+    
+    try {
+      const res = await fetch("/api/attempts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          testId: selectedTestId,
+          classId: selectedClassId,
+          results: result.results
+        })
+      });
+      
+      if (res.ok) {
+        toast.success("Natijalar bazaga muvaffaqiyatli saqlandi!");
+      } else {
+        toast.error("Saqlashda xatolik yuz berdi");
+      }
+    } catch (err) {
+      toast.error("Saqlashda xatolik yuz berdi");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const result = streamedResult;
+  const hasResults = result?.results && result.results.length > 0;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
           <CheckSquare className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Ommaviy AI Tekshiruvchi</h1>
-          <p className="text-slate-500">Barcha o'quvchilar javoblarini rasmga oling va bittada tekshiring</p>
+          <h1 className="text-2xl font-bold text-slate-900">AI Tekshiruvchi</h1>
+          <p className="text-slate-500">Testlarni Ommaviy Tekshirish va Heatmap tahlili</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_1.5fr] gap-8">
-        <div className="space-y-6">
-          <Card>
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  To'g'ri javob yoki topshiriq sharti
-                </label>
-                <textarea 
-                  required rows={4}
-                  placeholder="Masalan: Testning to'g'ri javoblari: 1-A, 2-B, 3-C. Yoki misolning sharti: 5x - 3 = 12..."
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 resize-none transition-colors"
-                  value={assignment}
-                  onChange={(e) => setAssignment(e.target.value)}
-                ></textarea>
+      <div className="grid lg:grid-cols-[350px_1fr] gap-6 items-start">
+        {/* Left Panel: Configuration */}
+        <Card className="sticky top-20">
+          <form onSubmit={handleSubmit} className="p-5 space-y-5">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Sinfni tanlang</label>
+              <select 
+                value={selectedClassId} 
+                onChange={e => setSelectedClassId(e.target.value)}
+                className="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+              >
+                {classes.length === 0 && <option value="">Sinflar yo'q</option>}
+                {classes.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Testni tanlang</label>
+              <select 
+                value={selectedTestId} 
+                onChange={e => setSelectedTestId(e.target.value)}
+                className="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                disabled={!selectedClassId || tests.length === 0}
+              >
+                {tests.length === 0 && <option value="">Testlar yo'q</option>}
+                {tests.map(t => (
+                  <option key={t.id} value={t.id}>{t.title} ({t.questionCount} ta savol)</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Javob varaqalari (Rasmlar)</label>
+              <div 
+                className="border-2 border-dashed border-emerald-200 rounded-xl p-6 text-center hover:bg-emerald-50/50 transition-colors cursor-pointer relative"
+                onClick={() => document.getElementById('file-upload')?.click()}
+              >
+                <Upload className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+                <p className="text-sm font-medium text-slate-600">Rasmlarni yuklash</p>
+                <p className="text-xs text-slate-400 mt-1">Ko'pi bilan 30 ta rasm (JPG, PNG)</p>
+                <input 
+                  id="file-upload"
+                  type="file" 
+                  multiple 
+                  accept="image/*"
+                  className="hidden" 
+                  onChange={handleFileChange}
+                />
               </div>
+            </div>
 
-              <div>
-                <div className="flex justify-between items-end mb-2">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    O'quvchilarning javob varaqalari (Rasmlar)
-                  </label>
-                  <span className="text-xs font-semibold px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">
-                    {files.length} / 30
-                  </span>
+            {files.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-semibold text-slate-500">
+                  <span>Yuklangan fayllar</span>
+                  <span>{files.length}/30</span>
                 </div>
-                
-                <div className="mt-1 flex justify-center px-6 pt-6 pb-6 border-2 border-emerald-200 dark:border-emerald-800/50 border-dashed rounded-xl bg-emerald-50/50 dark:bg-emerald-900/10 relative hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors cursor-pointer group">
-                  <div className="space-y-1 text-center">
-                    <div className="mx-auto w-12 h-12 bg-white dark:bg-slate-800 rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <ImageIcon2 className="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
+                <div className="grid grid-cols-3 gap-2">
+                  {files.map((file, idx) => (
+                    <div key={idx} className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-50">
+                      <img 
+                        src={URL.createObjectURL(file)} 
+                        alt="preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
+                        className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-5 h-5 text-white" />
+                      </button>
                     </div>
-                    <div className="flex text-sm text-slate-600 dark:text-slate-400 justify-center">
-                      <label htmlFor="file-upload" className="relative cursor-pointer bg-transparent rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none">
-                        <span>Rasmlarni tanlang (Bir nechta)</span>
-                        <input id="file-upload" name="file-upload" type="file" multiple className="sr-only" onChange={handleFileChange} accept="image/*" />
-                      </label>
-                    </div>
-                    <p className="text-xs text-slate-500">JPG, PNG formatida</p>
-                  </div>
+                  ))}
                 </div>
+              </div>
+            )}
 
-                {files.length > 0 && (
-                  <div className="mt-4 grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-1">
-                    {files.map((file, idx) => (
-                      <div key={idx} className="relative group rounded-lg overflow-hidden border border-slate-200 aspect-square">
-                        <img 
-                          src={URL.createObjectURL(file)} 
-                          alt="preview" 
-                          className="w-full h-full object-cover"
-                        />
-                        <button 
-                          type="button" 
-                          onClick={() => removeFile(idx)}
-                          className="absolute top-1 right-1 bg-black/60 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[9px] px-1 py-0.5 truncate text-center">
-                          {idx + 1}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+            <Button 
+              type="submit" 
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-base py-6"
+              disabled={isLoading || files.length === 0 || !selectedTestId}
+              loading={isLoading}
+            >
+              AIni ishga tushirish
+            </Button>
+            
+            {error && (
+              <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                <p>AI tarmog'ida xatolik yuz berdi. Iltimos qaytadan urinib ko'ring.</p>
+              </div>
+            )}
+          </form>
+        </Card>
+
+        {/* Right Panel: Heatmap Results */}
+        <div className="space-y-4">
+          {!hasResults && !isLoading ? (
+            <div className="h-[500px] flex items-center justify-center bg-slate-50 border border-dashed rounded-2xl">
+              <div className="text-center p-6">
+                <LayoutDashboard className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-slate-700">Natijalar jadvali</h3>
+                <p className="text-slate-500 max-w-sm mx-auto mt-2 text-sm">
+                  Rasmlarni yuklang va AI orqali tekshirishni boshlang. Natijalar savolma-savol tahlil qilinib, shu yerda paydo bo'ladi.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border">
+                <div>
+                  <h2 className="font-bold text-lg text-slate-800">Tahlil natijalari</h2>
+                  <p className="text-sm text-slate-500">
+                    {result?.results?.length || 0} ta o'quvchi tekshirildi
+                  </p>
+                </div>
+                {hasResults && !isLoading && (
+                  <Button onClick={saveResults} loading={isSaving} className="bg-emerald-600" leftIcon={<Save className="w-4 h-4"/>}>
+                    Bazaga saqlash
+                  </Button>
                 )}
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full bg-emerald-600 hover:bg-emerald-700"
-                isLoading={isLoading}
-                disabled={files.length === 0}
-                leftIcon={<Sparkles className="w-5 h-5" />}
-              >
-                {isLoading ? "Jonli tahlil qilinmoqda..." : "Barchasini tekshirish"}
-              </Button>
-            </form>
-          </Card>
-        </div>
-
-        <Card className="flex flex-col h-full min-h-[600px] !p-0 overflow-hidden bg-slate-50 relative">
-          {isLoading && !result && (
-            <div className="p-6 flex flex-col items-center justify-center h-full text-slate-500 animate-pulse">
-              <div className="relative">
-                <Sparkles className="w-12 h-12 mb-4 text-emerald-400 animate-spin" />
-                <ImageIcon2 className="w-5 h-5 text-emerald-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-              </div>
-              <p className="font-medium text-slate-600">Rasmlardagi yozuvlar o'qilmoqda...</p>
-              <p className="text-xs text-slate-400 mt-2">Bu jarayon 30 tagacha rasm uchun biroz vaqt olishi mumkin</p>
-            </div>
-          )}
-          
-          {result?.results && result.results.length > 0 && (
-            <div className="flex flex-col h-full animate-in slide-in-from-bottom-4 duration-500">
-              <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 sticky top-0 z-10 shadow-sm flex items-center justify-between">
-                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                  Tekshiruv Natijalari
-                </h2>
-                <div className="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-2">
-                  {isLoading && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>}
-                  Tahlil qilindi: {result.results.length} / {files.length}
-                </div>
-              </div>
-              
-              <div className="p-6 flex-1 overflow-y-auto space-y-4">
-                {result.results.map((item: any, i: number) => (
-                  <div key={i} className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden animate-in fade-in duration-300">
-                    <div className="p-4 border-b border-slate-100 dark:border-slate-700/50 flex flex-wrap gap-4 items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-center text-sm">
-                          {i + 1}
-                        </div>
-                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">
-                          {item?.student_name || <span className="text-slate-300 dark:text-slate-500">Ism aniqlanmoqda...</span>}
-                        </h3>
-                      </div>
-                      
-                      <div className="flex items-center gap-3">
-                        {item?.status && (
-                          <div className={`px-3 py-1 rounded-md text-xs font-bold ${
-                            item.status === "To'g'ri" ? "bg-emerald-100 text-emerald-700" :
-                            item.status === "Xato" ? "bg-red-100 text-red-700" :
-                            "bg-amber-100 text-amber-700"
-                          }`}>
-                            {item.status}
-                          </div>
-                        )}
-                        {item?.score && (
-                          <div className="text-xl font-black text-slate-800 dark:text-slate-100">
-                            {item.score}
-                          </div>
-                        )}
+              {result?.results?.map((res, idx) => (
+                <Card key={idx} className="overflow-hidden border-slate-200">
+                  <div className="bg-slate-50 p-4 border-b flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-800">{res.student_name || 'Noaniq'}</h3>
+                      <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 mt-1">
+                        <span className="bg-white px-2 py-1 rounded border">Variant: {res.variant || '-'}</span>
+                        <span className="bg-white px-2 py-1 rounded border">To'g'ri: {res.score || 0} ta</span>
                       </div>
                     </div>
-
-                    <div className="p-4 space-y-4">
-                      {item?.mistakes && item.mistakes.length > 0 && (
-                        <div>
-                          <h4 className="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-1.5">
-                            <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                            Xato va Kamchiliklar
-                          </h4>
-                          <ul className="space-y-1.5 pl-5">
-                            {item.mistakes.map((mistake: string, idx: number) => (
-                              <li key={idx} className="text-sm text-slate-700 list-disc">{mistake}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {item?.feedback && (
-                        <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100/50 text-sm">
-                          <h4 className="text-xs font-bold text-blue-800 uppercase mb-1 flex items-center gap-1.5">
-                            <Lightbulb className="w-3.5 h-3.5" /> Xulosa
-                          </h4>
-                          <p className="text-slate-700">{item.feedback}</p>
-                        </div>
-                      )}
+                    <div className="text-right">
+                      <div className="text-3xl font-black text-emerald-600">{res.percentage || 0}%</div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                  
+                  <div className="p-4">
+                    <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">Savollar bo'yicha tahlil (Heatmap)</p>
+                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                      {res.answers?.map((ans, aIdx) => {
+                        const isCorrect = ans.isCorrect;
+                        const isUnanswered = ans.studentAnswer === "-";
+                        const lowConfidence = (ans.confidence || 1) < 0.8;
+                        
+                        let bgColor = "bg-slate-100 border-slate-200";
+                        if (isCorrect) bgColor = "bg-emerald-100 border-emerald-200 text-emerald-800";
+                        else if (!isUnanswered) bgColor = "bg-red-100 border-red-200 text-red-800";
+                        else bgColor = "bg-slate-200 border-slate-300 text-slate-600";
+                        
+                        return (
+                          <div key={aIdx} className={`relative flex flex-col items-center justify-center p-2 rounded-lg border ${bgColor} ${lowConfidence ? 'ring-2 ring-amber-400 border-transparent' : ''}`}>
+                            <span className="text-[10px] opacity-70 mb-0.5">{ans.question || aIdx+1}</span>
+                            <span className="font-bold">{ans.studentAnswer || '-'}</span>
+                            {lowConfidence && (
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse" title="AI ishonchi past (Ustoz tekshiruvi tavsiya etiladi)" />
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    
+                    {res.answers?.some(a => (a.confidence || 1) < 0.8) && (
+                      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-sm">
+                        <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
+                        <div>
+                          <p className="font-semibold text-amber-800">Noaniq javoblar mavjud</p>
+                          <p className="text-amber-700 mt-0.5">Sariq nuqta bilan belgilangan savollarni qayta ko'zdan kechirishingiz tavsiya etiladi. AI ularni o'qishda qiynalgan bo'lishi mumkin.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </>
           )}
-
-          {!isLoading && !result?.results && (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-8 text-center h-full min-h-[400px]">
-              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                <CheckSquare className="w-8 h-8 text-slate-300 dark:text-slate-600" />
-              </div>
-              <h3 className="text-lg font-medium text-slate-600 dark:text-slate-200 mb-2">Barcha qog'ozlarni birdan tekshiring</h3>
-              <p className="text-sm max-w-sm">Topshiriq shartini yozing, o'quvchilar javoblarini suratga olib bir vaqtda yuklang va AI natijani jadval qilib beradi.</p>
-            </div>
-          )}
-        </Card>
+        </div>
       </div>
     </div>
   );

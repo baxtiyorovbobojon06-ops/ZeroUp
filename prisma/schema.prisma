@@ -1,0 +1,99 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Class {
+  id            String    @id @default(uuid())
+  name          String
+  academicYear  String?
+  description   String?
+  createdAt     DateTime  @default(now())
+  
+  students      Student[]
+  tests         Test[]
+  reports       Report[]
+}
+
+model Student {
+  id            String    @id @default(uuid())
+  firstName     String
+  lastName      String
+  classId       String
+  class         Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  
+  attempts      TestAttempt[]
+}
+
+model Test {
+  id            String    @id @default(uuid())
+  classId       String
+  class         Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject       String
+  title         String
+  questionCount Int
+  date          DateTime  @default(now())
+  answerKey     String    // Fallback or main answer key (JSON string or simple text)
+  createdAt     DateTime  @default(now())
+  
+  variants      TestVariant[]
+  attempts      TestAttempt[]
+  reports       Report[]
+}
+
+model TestVariant {
+  id            String    @id @default(uuid())
+  testId        String
+  test          Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  name          String
+  answerKey     String    // E.g., JSON { "1": "A", "2": "C" }
+}
+
+model TestAttempt {
+  id               String    @id @default(uuid())
+  testId           String
+  test             Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  studentId        String
+  student          Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  variant          String?   
+  score            Float     
+  percentage       Float     
+  correctCount     Int
+  incorrectCount   Int
+  unansweredCount  Int
+  imageUrl         String?
+  needsReview      Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  
+  answers          StudentAnswer[]
+}
+
+model StudentAnswer {
+  id               String    @id @default(uuid())
+  attemptId        String
+  attempt          TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionNumber   Int
+  studentAnswer    String?
+  correctAnswer    String?
+  isCorrect        Boolean
+  confidence       Float
+  isUncertain      Boolean   @default(false)
+}
+
+model Report {
+  id               String    @id @default(uuid())
+  testId           String
+  test             Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  classId          String
+  class            Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  averageScore     Float
+  highestScore     Float
+  lowestScore      Float
+  aiSummary        String?
+  aiRecommendation String?
+  createdAt        DateTime  @default(now())
+}
