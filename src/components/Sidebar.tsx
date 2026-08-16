@@ -3,17 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  FileSignature, 
-  CheckSquare, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  FileSignature,
+  CheckSquare,
   FileBarChart,
   Settings,
   Sparkles,
   Menu,
   X,
-  Star,
   Users
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -23,10 +22,8 @@ const navItems = [
   { name: "Sinflar", href: "/classes", icon: Users },
   { name: "Dars Rejasi", href: "/lesson-planner", icon: BookOpen },
   { name: "Testlar", href: "/tests", icon: FileSignature },
-  { name: "AI Test Yaratuvchi", href: "/test-generator", icon: FileSignature },
   { name: "Tekshirish", href: "/grader", icon: CheckSquare },
   { name: "Hisobot", href: "/report", icon: FileBarChart },
-  { name: "Saqlanganlar", href: "/saved", icon: Star },
   { name: "Sozlanmalar", href: "/settings", icon: Settings },
 ];
 
