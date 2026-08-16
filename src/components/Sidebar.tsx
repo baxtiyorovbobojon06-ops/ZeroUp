@@ -37,12 +37,15 @@ export default function Sidebar() {
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 glass-panel border-b border-white/50 z-40 relative shadow-sm">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shrink-0">
             <Sparkles className="text-white w-4 h-4" />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-violet-700 to-indigo-600 bg-clip-text text-transparent">
-            MaktabAI
-          </span>
+          <div className="flex flex-col overflow-hidden">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Xush kelibsiz</span>
+            <span className="text-sm font-bold bg-gradient-to-r from-violet-700 to-indigo-600 bg-clip-text text-transparent truncate max-w-[120px]">
+              {profileName} 👋
+            </span>
+          </div>
         </Link>
         <button onClick={() => setIsOpen(true)} className="p-2 text-slate-600 hover:bg-white/50 rounded-xl transition-colors">
           <Menu className="w-6 h-6" />
@@ -63,12 +66,15 @@ export default function Sidebar() {
         {/* Header inside sidebar */}
         <div className="h-20 md:h-24 flex items-center justify-between px-6 md:px-8 border-b border-white/40">
           <Link href="/" className="flex items-center gap-3 group" onClick={() => setIsOpen(false)}>
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 transform group-hover:rotate-6">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg group-hover:shadow-glow transition-all duration-300 transform group-hover:rotate-6 shrink-0">
               <Sparkles className="text-white w-5 h-5" />
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-violet-700 to-indigo-600 bg-clip-text text-transparent">
-              MaktabAI
-            </span>
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Xush kelibsiz</span>
+              <span className="text-lg font-bold bg-gradient-to-r from-violet-700 to-indigo-600 bg-clip-text text-transparent truncate">
+                {profileName} 👋
+              </span>
+            </div>
           </Link>
           <button onClick={() => setIsOpen(false)} className="md:hidden p-2 text-slate-400 hover:bg-white/50 hover:text-slate-700 rounded-xl transition-colors">
             <X className="w-6 h-6" />
