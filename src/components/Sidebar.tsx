@@ -66,7 +66,7 @@ export default function Sidebar() {
         {/* Header inside sidebar */}
         <div className="h-20 md:h-24 flex items-center justify-between px-6 md:px-8 border-b border-white/40">
           <Link href="/" className="flex items-center gap-3 group" onClick={() => setIsOpen(false)}>
-            <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg group-hover:neon-mode-shadow transition-all duration-300 transform group-hover:rotate-6 shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg transition-all duration-300 transform group-hover:rotate-6 shrink-0">
               <Sparkles className="text-white w-5 h-5" />
             </div>
             <div className="flex flex-col overflow-hidden">
@@ -98,11 +98,11 @@ export default function Sidebar() {
                 }`}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full neon-mode-shadow"></div>
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>
                 )}
                 <div className={`p-2.5 rounded-xl transition-all duration-300 ${
                   isActive 
-                    ? 'bg-primary text-white shadow-lg neon-mode-shadow scale-110' 
+                    ? 'bg-primary text-white shadow-lg scale-110' 
                     : 'bg-white text-appicon shadow-sm border border-slate-100 group-hover:text-primary group-hover:shadow-md group-hover:border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:group-hover:bg-slate-700'
                 }`}>
                   <Icon className="w-5 h-5" />

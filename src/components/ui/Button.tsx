@@ -25,7 +25,7 @@ export const Button: React.FC<ButtonProps> = ({
         relative overflow-hidden flex items-center justify-center gap-2 
         font-bold py-3.5 px-6 rounded-2xl transition-all duration-300 transform active:scale-95
         disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none
-        ${!isCustom ? 'bg-[var(--primary-color)] hover:opacity-90 text-white shadow-lg hover:neon-mode-shadow hover:-translate-y-0.5 border border-white/20' : className}
+        ${!isCustom ? 'bg-primary hover:opacity-90 text-white shadow-lg hover:-translate-y-0.5 border border-white/20' : className}
       `}
       disabled={isLoading || disabled}
       {...props}

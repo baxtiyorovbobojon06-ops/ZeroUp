@@ -20,8 +20,17 @@
   --foreground: #f8fafc; /* slate-50 */
 }
 
-.neon-mode {
-  --neon-shadow: 0 0 10px var(--neon-glow-color), 0 0 20px var(--neon-glow-color);
+.neon-mode .bg-primary,
+.neon-mode .group:hover .bg-primary {
+  box-shadow: 0 0 15px var(--neon-glow-color), 0 0 30px var(--neon-glow-color) !important;
+}
+
+.neon-mode .text-primary {
+  text-shadow: 0 0 8px var(--neon-glow-color) !important;
+}
+
+.neon-mode .border-primary {
+  box-shadow: 0 0 10px var(--neon-glow-color) inset, 0 0 10px var(--neon-glow-color) !important;
 }
 
 @theme inline {
@@ -75,14 +84,6 @@ body {
 
   .shadow-glow {
     box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
-  }
-  
-  .neon-mode-shadow {
-    box-shadow: var(--neon-shadow);
-  }
-  
-  .neon-mode-text {
-    text-shadow: 0 0 8px var(--neon-glow-color);
   }
 }
 
