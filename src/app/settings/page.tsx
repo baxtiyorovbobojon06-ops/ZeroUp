@@ -578,6 +578,32 @@ export default function SettingsPage() {
             />
           </div>
         </div>
+
+        <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-700">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Ranglar palitrasi (Tezkor tanlash)</p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              '#f43f5e', '#ec4899', '#d946ef', '#a855f7', 
+              '#8b5cf6', '#6366f1', '#3b82f6', '#0ea5e9', 
+              '#06b6d4', '#14b8a6', '#10b981', '#22c55e', 
+              '#84cc16', '#eab308', '#f59e0b', '#f97316'
+            ].map(color => (
+              <button
+                key={color}
+                onClick={() => {
+                  setPrimaryColor(color);
+                  setNeonGlowColor(color);
+                  setIconColor(color);
+                  setDesignTheme('custom');
+                }}
+                className="w-8 h-8 rounded-full border border-black/10 shadow-sm hover:scale-110 transition-transform"
+                style={{ backgroundColor: color }}
+                title={color}
+              />
+            ))}
+          </div>
+          <p className="text-xs text-slate-500 mt-3">Yuqoridagi ranglardan birini tanlasangiz, u barcha maxsus ranglarga (tugma, neon, ikonka) bir xilda qo'llaniladi.</p>
+        </div>
       </Card>
     </div>
   );
