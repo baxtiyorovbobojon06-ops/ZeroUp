@@ -92,7 +92,7 @@ export default function TestsPage() {
       } else {
         toast.error("Xatolik yuz berdi");
       }
-    } catch (err) {
+    } catch {
       toast.error("Xatolik yuz berdi");
     }
   };
@@ -105,7 +105,7 @@ export default function TestsPage() {
         toast.success("Test o'chirildi");
         fetchTests();
       }
-    } catch (err) {
+    } catch {
       toast.error("Xatolik yuz berdi");
     }
   };

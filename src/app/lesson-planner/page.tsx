@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { BookOpen, Sparkles, Download, Clock, Target, PenTool, CheckCircle, Upload, X } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -12,7 +13,6 @@ import { z } from 'zod';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { useHistory } from "@/hooks/useHistory";
 
 interface LessonPhase {
@@ -83,7 +83,7 @@ export default function LessonPlanner() {
   });
   const [file, setFile] = useState<File | null>(null);
 
-  const { object: streamedResult, submit, isLoading, error } = useObject({
+  const { object: streamedResult, submit, isLoading } = useObject({
     api: '/api/lesson-planner',
     schema: schema,
     onFinish: ({ object }) => {
@@ -94,7 +94,7 @@ export default function LessonPlanner() {
          toast.success("Dars rejasi tayyor!");
        }
     },
-    onError: (err) => {
+    onError: () => {
        toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.");
     }
   });
@@ -174,7 +174,7 @@ export default function LessonPlanner() {
       pdf.save(`dars-rejasi-${result?.title || "AI"}.pdf`);
       
       toast.success("PDF saqlandi!", { id: toastId });
-    } catch (error) {
+    } catch {
       toast.error("PDF saqlashda xatolik yuz berdi.", { id: toastId });
     }
   };
@@ -307,11 +307,12 @@ export default function LessonPlanner() {
                 {/* AI Image Generation via Pollinations */}
                 {result.image_prompt && !isLoading && (
                   <div className="w-full h-64 md:h-80 rounded-2xl overflow-hidden relative shadow-lg group animate-in fade-in">
-                    <img 
+                    <Image
                       src={`https://image.pollinations.ai/prompt/${encodeURIComponent(result.image_prompt)}?width=800&height=400&nologo=true`}
-                      alt={result.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
+                      alt={result.title || "Dars rasmi"}
+                      fill
+                      unoptimized
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent pointer-events-none"></div>
                     <div className="absolute bottom-4 left-4 right-4 pointer-events-none">

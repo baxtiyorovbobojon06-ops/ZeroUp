@@ -10,7 +10,7 @@ export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
-    const { testId, answerKey, questionCount, images } = await request.json();
+    const { answerKey, questionCount, images } = await request.json();
 
     if (!answerKey || !images || images.length === 0) {
       return new Response(JSON.stringify({ error: "Kerakli ma'lumotlar to'liq emas" }), { status: 400 });

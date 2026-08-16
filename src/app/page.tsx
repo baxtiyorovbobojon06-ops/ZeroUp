@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Users, FileSignature, CheckSquare, BarChart2, ArrowRight, BookOpen, Clock, Calendar, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -23,6 +24,7 @@ interface Stats {
 }
 
 export default function Home() {
+  const router = useRouter();
   const { profileName } = useSettings();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -170,7 +172,7 @@ export default function Home() {
             <BookOpen className="w-5 h-5 text-slate-400" />
             Tezkor havolalar
           </h2>
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all" onClick={() => window.location.href='/classes'}>
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all" onClick={() => router.push('/classes')}>
             <div className="relative z-10">
               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-sm">
                 <Users className="w-5 h-5" />
@@ -184,7 +186,7 @@ export default function Home() {
             <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
           </div>
 
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all" onClick={() => window.location.href='/grader'}>
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-md relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all" onClick={() => router.push('/grader')}>
             <div className="relative z-10">
               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-sm">
                 <CheckSquare className="w-5 h-5" />

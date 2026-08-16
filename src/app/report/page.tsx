@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { FileBarChart, ArrowLeft, BrainCircuit, Target, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { FileBarChart, ArrowLeft, BrainCircuit, Target, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";

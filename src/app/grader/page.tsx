@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckSquare, Upload, ImageIcon, X, AlertCircle, Save, BookOpen, LayoutDashboard } from "lucide-react";
+import Image from "next/image";
+import { CheckSquare, Upload, X, AlertCircle, Save, LayoutDashboard } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { experimental_useObject as useObject } from '@ai-sdk/react';
@@ -141,7 +142,7 @@ export default function Grader() {
         questionCount: test.questionCount,
         images: imagesData
       });
-    } catch (err) {
+    } catch {
       toast.dismiss("graderLoad");
       toast.error("Rasmlarni o'qishda xatolik");
     }
@@ -167,7 +168,7 @@ export default function Grader() {
       } else {
         toast.error("Saqlashda xatolik yuz berdi");
       }
-    } catch (err) {
+    } catch {
       toast.error("Saqlashda xatolik yuz berdi");
     } finally {
       setIsSaving(false);
@@ -251,10 +252,12 @@ export default function Grader() {
                 <div className="grid grid-cols-3 gap-2">
                   {files.map((file, idx) => (
                     <div key={idx} className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-50">
-                      <img 
-                        src={URL.createObjectURL(file)} 
-                        alt="preview" 
-                        className="w-full h-full object-cover"
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        alt="preview"
+                        fill
+                        unoptimized
+                        className="object-cover"
                       />
                       <button
                         type="button"

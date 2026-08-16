@@ -40,7 +40,7 @@ export default function TestGenerator() {
 
       const data = await response.json();
       setResult(data);
-    } catch (error) {
+    } catch {
       toast.error("Xatolik yuz berdi. Qayta urinib ko'ring.");
     } finally {
       setLoading(false);

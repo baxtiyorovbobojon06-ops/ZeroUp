@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Plus, Trash2, Edit2, Users2, Search, BookOpen } from "lucide-react";
+import { Users, Plus, Trash2, Users2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import toast from "react-hot-toast";
@@ -96,7 +96,7 @@ export default function ClassesPage() {
       } else {
         toast.error("Xatolik yuz berdi");
       }
-    } catch (err) {
+    } catch {
       toast.error("Xatolik yuz berdi");
     }
   };
@@ -112,7 +112,7 @@ export default function ClassesPage() {
         if (selectedClass?.id === id) setSelectedClass(null);
         fetchClasses();
       }
-    } catch (err) {
+    } catch {
       toast.error("Xatolik yuz berdi");
     }
   };
@@ -140,7 +140,7 @@ export default function ClassesPage() {
         fetchStudents(selectedClass.id);
         fetchClasses(); // Update count
       }
-    } catch (err) {
+    } catch {
       toast.error("Xatolik yuz berdi");
     }
   };
@@ -156,7 +156,7 @@ export default function ClassesPage() {
         fetchStudents(selectedClass.id);
         fetchClasses();
       }
-    } catch (err) {
+    } catch {
       toast.error("Xatolik yuz berdi");
     }
   };

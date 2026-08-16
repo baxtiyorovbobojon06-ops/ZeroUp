@@ -88,8 +88,8 @@ export function NotificationsDrawer({ isOpen, onClose }: NotificationsDrawerProp
               <div className="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-300 rounded-2xl border border-rose-100 dark:border-rose-800/30 flex items-start gap-3">
                 <Bell className="w-5 h-5 mt-0.5 opacity-70" />
                 <div>
-                  <h4 className="font-semibold text-sm">Bildirishnomalar panelini o'chirib qo'ydingiz</h4>
-                  <p className="text-xs opacity-80 mt-1">Sizga endi xabarlar kelmaydi, bu yerda faqat eski xabarlarni ko'rishingiz mumkin.</p>
+                  <h4 className="font-semibold text-sm">Bildirishnomalar panelini o&apos;chirib qo&apos;ydingiz</h4>
+                  <p className="text-xs opacity-80 mt-1">Sizga endi xabarlar kelmaydi, bu yerda faqat eski xabarlarni ko&apos;rishingiz mumkin.</p>
                 </div>
               </div>
             )}

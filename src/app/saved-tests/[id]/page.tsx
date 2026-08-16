@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { mockTests, SavedTest, Question, AnswerOption } from "@/data/mockTests";
+import { mockTests, SavedTest } from "@/data/mockTests";
 import { ChevronLeft, Save, FileSignature } from "lucide-react";
 import toast from "react-hot-toast";
 

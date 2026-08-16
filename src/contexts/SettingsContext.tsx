@@ -80,19 +80,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedTheme) setThemeState(savedTheme);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedLang) setLanguageState(savedLang);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedSize) setFontSizeState(savedSize);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedFont) setFontFamilyState(savedFont);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedName) setProfileNameState(savedName);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedNotifications !== null) setNotificationsState(savedNotifications === 'true');
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedMuted !== null) setNotificationsMutedState(savedMuted === 'true');
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedTests) {
       try {
         setSavedTestIds(JSON.parse(savedTests));
@@ -118,7 +111,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (savedAppBgColor) setAppBgColorState(savedAppBgColor);
     if (savedAppBgColorDark) setAppBgColorDarkState(savedAppBgColorDark);
     
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
   }, []);
 

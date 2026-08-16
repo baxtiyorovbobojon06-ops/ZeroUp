@@ -9,17 +9,16 @@ import { Language } from "@/utils/translations";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
-type FontSize = 'sm' | 'base' | 'lg';
 type FontFamily = 'inter' | 'roboto' | 'nunito';
 
 type ViewState = 'main' | 'system' | 'language' | 'profile' | 'notifications' | 'design';
 
 export default function SettingsPage() {
-  const { 
+  const {
     theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted,
-    neonMode, designTheme, primaryColor, neonGlowColor, iconColor, appBgColor, appBgColorDark,
+    neonMode, designTheme, primaryColor, neonGlowColor, iconColor,
     setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted,
-    setNeonMode, setDesignTheme, setPrimaryColor, setNeonGlowColor, setIconColor, setAppBgColor, setAppBgColorDark, t 
+    setNeonMode, setDesignTheme, setPrimaryColor, setNeonGlowColor, setIconColor, setAppBgColor, setAppBgColorDark, t
   } = useSettings();
   
   const [currentView, setCurrentView] = useState<ViewState>('main');
