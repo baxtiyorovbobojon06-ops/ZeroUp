@@ -258,20 +258,20 @@ export default function ReportGenerator() {
                 </div>
 
                 {/* Xulosa */}
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl flex gap-3">
-                  <Flag className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl flex gap-3">
+                  <Flag className="w-5 h-5 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Umumiy Xulosa</h3>
-                    <p className="text-slate-700 text-sm leading-relaxed">{result.conclusion}</p>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-1">Umumiy Xulosa</h3>
+                    <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">{result.conclusion}</p>
                   </div>
                 </div>
 
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center h-full">
-              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                <FileBarChart className="w-8 h-8 text-slate-300" />
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-8 text-center h-full min-h-[400px]">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                <FileBarChart className="w-8 h-8 text-slate-300 dark:text-slate-600" />
               </div>
               <p>Chap tomondagi formani to'ldiring va<br/>avtomatik hisobotni oling.</p>
             </div>

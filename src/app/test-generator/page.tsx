@@ -164,24 +164,24 @@ export default function TestGenerator() {
           </form>
         </div>
 
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-12rem)]">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col h-[calc(100vh-12rem)]">
           {result ? (
             <div className="flex flex-col h-full animate-in slide-in-from-bottom-4 duration-500">
-              <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10 rounded-t-2xl shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900">
+              <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 rounded-t-2xl shadow-sm">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                   Natija: {result.questions.length} ta savol
                 </h2>
-                <button onClick={downloadPDF} className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 font-medium rounded-lg hover:bg-indigo-100 transition-colors">
+                <button onClick={downloadPDF} className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-medium rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">
                   <Download className="w-4 h-4" />
                   <span className="hidden sm:inline">PDF yuklash</span>
                 </button>
               </div>
               
-              <div className="p-4 sm:p-6 flex-1 overflow-y-auto space-y-8 bg-slate-50/50">
+              <div className="p-4 sm:p-6 flex-1 overflow-y-auto space-y-8 bg-slate-50/50 dark:bg-slate-800/30">
                 {result.questions.map((q, i) => (
-                  <div key={i} className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm relative">
+                  <div key={i} className="bg-white dark:bg-slate-800 p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm relative">
                     <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 rounded-l-xl"></div>
-                    <h3 className="text-lg font-medium text-slate-900 mb-4 pl-2 flex gap-3">
+                    <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-4 pl-2 flex gap-3">
                       <span className="text-indigo-500 font-bold">{i + 1}.</span> 
                       {q.question}
                     </h3>
@@ -194,12 +194,12 @@ export default function TestGenerator() {
                             key={idx} 
                             className={`flex items-center gap-3 p-3 rounded-lg border ${
                               isCorrect 
-                                ? 'bg-emerald-50 border-emerald-200 text-emerald-900 font-medium' 
-                                : 'bg-slate-50 border-slate-200 text-slate-700'
+                                ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/50 text-emerald-900 dark:text-emerald-300 font-medium' 
+                                : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
                             }`}
                           >
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                              isCorrect ? 'bg-emerald-200 text-emerald-700' : 'bg-slate-200 text-slate-500'
+                              isCorrect ? 'bg-emerald-200 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                             }`}>
                               {String.fromCharCode(65 + idx)}
                             </div>
@@ -211,8 +211,8 @@ export default function TestGenerator() {
                     </div>
                     
                     <div className="mt-5 pl-8 text-sm">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg">
-                        <span className="font-semibold">Izoh:</span> {q.explanation}
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-lg">
+                        <span className="font-semibold">Izoh:</span> <span className="dark:text-blue-300/80">{q.explanation}</span>
                       </div>
                     </div>
                   </div>
@@ -220,9 +220,9 @@ export default function TestGenerator() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center h-full">
-              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                <FileSignature className="w-8 h-8 text-slate-300" />
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-8 text-center h-full">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                <FileSignature className="w-8 h-8 text-slate-300 dark:text-slate-600" />
               </div>
               <p>Chap tomondagi formani to'ldiring va<br/>test savollarini kuting.</p>
             </div>
