@@ -10,33 +10,15 @@ import { mockTests } from "@/data/mockTests";
 export default function Home() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(true);
-  const { notificationsEnabled, notificationsMuted } = useSettings();
+  const { notificationsEnabled, notificationsMuted, savedTestIds, toggleSaveTest: contextToggleSaveTest } = useSettings();
 
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>('month');
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
 
-  const [savedTestIds, setSavedTestIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('savedTestIds');
-    if (saved) {
-      try {
-        setSavedTestIds(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse saved tests', e);
-      }
-    }
-  }, []);
-
   const toggleSaveTest = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    setSavedTestIds(prev => {
-      const newSaved = prev.includes(id) ? prev.filter(tId => tId !== id) : [...prev, id];
-      localStorage.setItem('savedTestIds', JSON.stringify(newSaved));
-      return newSaved;
-    });
+    contextToggleSaveTest(id);
   };
 
   const timeLabels = {
@@ -355,42 +337,6 @@ export default function Home() {
         </div>
 
       </div>
-
-      {/* Saved Tests Section */}
-      {savedTestIds.length > 0 && (
-        <div id="saqlanganlar" className="mt-6 bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700">
-          <div className="flex items-center gap-2 mb-6">
-            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Saqlangan testlar</h2>
-            <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full text-xs font-semibold ml-2">
-              {savedTestIds.length}
-            </span>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockTests.filter(test => savedTestIds.includes(test.id)).map((test) => (
-              <Link key={`saved-${test.id}`} href={`/saved-tests/${test.id}`} className="flex items-center gap-4 group cursor-pointer bg-slate-50 hover:bg-slate-100 dark:bg-slate-700/40 dark:hover:bg-slate-700/80 p-3 rounded-2xl transition-colors border border-slate-100 dark:border-slate-700/50">
-                <div className="w-12 h-12 bg-white dark:bg-slate-800 shadow-sm text-yellow-500 rounded-xl flex items-center justify-center shrink-0">
-                  <Star className="w-6 h-6 fill-yellow-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate group-hover:text-yellow-600 dark:group-hover:text-yellow-500 transition-colors">
-                    {test.grade} {test.subject} - {test.title}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{test.timeAgo}</p>
-                </div>
-                <button 
-                  onClick={(e) => toggleSaveTest(e, test.id)}
-                  className="p-2 hover:bg-white dark:hover:bg-slate-600 rounded-xl transition-colors shadow-sm bg-slate-100 dark:bg-slate-700 shrink-0"
-                  title="Saqlanganlardan olib tashlash"
-                >
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 hover:opacity-70 transition-opacity" />
-                </button>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <div className="text-center pt-8 pb-4">

@@ -22,6 +22,8 @@ interface SettingsContextType {
   setProfileName: (n: string) => void;
   setNotificationsEnabled: (n: boolean) => void;
   setNotificationsMuted: (m: boolean) => void;
+  savedTestIds: string[];
+  toggleSaveTest: (id: string) => void;
   t: (key: string) => string;
 }
 
@@ -35,6 +37,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [profileName, setProfileNameState] = useState<string>("O'qituvchi");
   const [notificationsEnabled, setNotificationsState] = useState<boolean>(true);
   const [notificationsMuted, setNotificationsMutedState] = useState<boolean>(false);
+  const [savedTestIds, setSavedTestIds] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -46,6 +49,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedName = localStorage.getItem('profileName');
     const savedNotifications = localStorage.getItem('notificationsEnabled');
     const savedMuted = localStorage.getItem('notificationsMuted');
+    const savedTests = localStorage.getItem('savedTestIds');
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedTheme) setThemeState(savedTheme);
@@ -61,6 +65,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (savedNotifications !== null) setNotificationsState(savedNotifications === 'true');
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (savedMuted !== null) setNotificationsMutedState(savedMuted === 'true');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (savedTests) {
+      try {
+        setSavedTestIds(JSON.parse(savedTests));
+      } catch (e) {
+        console.error('Failed to parse saved tests in context', e);
+      }
+    }
     
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
@@ -112,14 +124,22 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (isLoaded) localStorage.setItem('notificationsMuted', muted.toString());
   };
 
+  const toggleSaveTest = (id: string) => {
+    setSavedTestIds(prev => {
+      const newSaved = prev.includes(id) ? prev.filter(tId => tId !== id) : [...prev, id];
+      if (isLoaded) localStorage.setItem('savedTestIds', JSON.stringify(newSaved));
+      return newSaved;
+    });
+  };
+
   const t = (key: string): string => {
     return translations[language][key] || key;
   };
 
   return (
     <SettingsContext.Provider value={{ 
-      theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted,
-      setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted, t 
+      theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted, savedTestIds,
+      setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted, toggleSaveTest, t 
     }}>
       {children}
     </SettingsContext.Provider>
