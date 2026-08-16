@@ -35,7 +35,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 glass-panel border-b border-white/50 z-40 relative shadow-sm">
+      <div className="md:hidden flex items-center justify-between p-4 bg-transparent z-40 relative">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg shrink-0">
             <Sparkles className="text-white w-4 h-4" />
