@@ -21,7 +21,7 @@ interface TestItem {
   date: string;
   questionCount: number;
   answerKey: string;
-  class?: ClassItem;
+  class?: ClassItem | null;
   _count?: { attempts: number };
 }
 
@@ -33,32 +33,37 @@ interface GenerateTestPayload {
   qiyinlik: string;
 }
 
-// Simulates the AI generation call until the backend endpoint exists.
-async function mockGenerateTest(payload: GenerateTestPayload): Promise<TestItem> {
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-  return {
-    id: `mock-${Date.now()}`,
-    title: payload.mavzu,
-    subject: payload.fan,
-    date: new Date().toISOString(),
-    questionCount: parseInt(payload.savollarSoni) || 0,
-    answerKey: `AI tomonidan generatsiya qilingan (qiyinlik: ${payload.qiyinlik})`,
-    class: { id: "mock", name: payload.sinf },
-    _count: { attempts: 0 },
-  };
+interface AnswerKeyMeta {
+  grade?: string;
+  difficulty?: string;
 }
 
-// TODO(backend): once POST /api/tests/generate is ready, replace the body
-// below with the real call and drop mockGenerateTest:
-//   const res = await fetch('/api/tests/generate', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify(payload),
-//   });
-//   if (!res.ok) throw new Error('generate failed');
-//   return res.json();
+// AI-generated tests store { grade, difficulty, questions } as JSON in
+// answerKey (no real classId yet), while manually-entered tests keep a plain
+// answer-key string. Try to read the AI shape; fall back to null otherwise.
+function parseAnswerKeyMeta(answerKey: string): AnswerKeyMeta | null {
+  try {
+    const parsed = JSON.parse(answerKey);
+    if (parsed && typeof parsed === "object" && Array.isArray(parsed.questions)) {
+      return { grade: parsed.grade, difficulty: parsed.difficulty };
+    }
+  } catch {
+    // not JSON — a plain manually-entered answer key
+  }
+  return null;
+}
+
 async function generateTest(payload: GenerateTestPayload): Promise<TestItem> {
-  return mockGenerateTest(payload);
+  const res = await fetch('/api/tests/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.error || 'Test generatsiya qilishda xatolik yuz berdi');
+  }
+  return res.json();
 }
 
 const initialGenForm: GenerateTestPayload = {
@@ -110,8 +115,9 @@ export default function TestsPage() {
       toast.success("Test muvaffaqiyatli yaratildi");
       setShowCreateModal(false);
       setGenForm(initialGenForm);
-    } catch {
-      setGenerateError("Test yaratib bo'lmadi, qayta urinib ko'ring.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      setGenerateError(message || "Test yaratib bo'lmadi, qayta urinib ko'ring.");
     } finally {
       setGenerating(false);
     }
@@ -173,38 +179,45 @@ export default function TestsPage() {
         <EmptyState icon={BookOpen} title="Hali hech qanday test yaratilmagan" description="Yangi test yaratish uchun yuqoridagi tugmani bosing" />
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tests.map(test => (
-            <Card key={test.id} className="flex flex-col h-full p-0 hover:border-amber-300 dark:hover:border-amber-500/40 hover:shadow-md transition-all group">
-              <div className="p-5 flex-1">
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-xs font-bold px-2.5 py-1 bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-400 rounded-full">
-                    {test.class?.name || 'Sinf topilmadi'}
+          {tests.map(test => {
+            const meta = test.class ? null : parseAnswerKeyMeta(test.answerKey);
+            const gradeLabel = test.class?.name || (meta?.grade ? `${meta.grade}-sinf` : 'Sinf topilmadi');
+
+            return (
+              <Card key={test.id} className="flex flex-col h-full p-0 hover:border-amber-300 dark:hover:border-amber-500/40 hover:shadow-md transition-all group">
+                <div className="p-5 flex-1">
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-xs font-bold px-2.5 py-1 bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-400 rounded-full">
+                      {gradeLabel}
+                    </span>
+                    <button
+                      onClick={() => handleDelete(test.id)}
+                      className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-1">{test.title}</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{test.subject}</p>
+
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
+                    <div>📅 {new Date(test.date).toLocaleDateString()}</div>
+                    <div>📝 {test.questionCount} ta savol</div>
+                    <div>✅ {test._count?.attempts || 0} ta topshirilgan</div>
+                  </div>
+                </div>
+
+                <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 rounded-b-3xl flex justify-between items-center">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-[200px]">
+                    {meta
+                      ? `AI test • Qiyinlik: ${meta.difficulty || "O'rta"}`
+                      : `Kalit: ${test.answerKey.substring(0, 30)}...`}
                   </span>
-                  <button
-                    onClick={() => handleDelete(test.id)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
                 </div>
-
-                <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100 mb-1">{test.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">{test.subject}</p>
-
-                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400">
-                  <div>📅 {new Date(test.date).toLocaleDateString()}</div>
-                  <div>📝 {test.questionCount} ta savol</div>
-                  <div>✅ {test._count?.attempts || 0} ta topshirilgan</div>
-                </div>
-              </div>
-
-              <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 rounded-b-3xl flex justify-between items-center">
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate max-w-[200px]">
-                  Kalit: {test.answerKey.substring(0, 30)}...
-                </span>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
 
