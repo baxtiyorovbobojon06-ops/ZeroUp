@@ -18,7 +18,7 @@ export const Input: React.FC<InputProps> = ({ label, error, className = "", ...p
           className={`
             w-full px-5 py-3.5 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border-2 border-white/60 dark:border-slate-700/60 rounded-2xl 
             text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 font-medium
-            focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-violet-400 dark:focus:border-violet-500 focus:shadow-[0_0_0_4px_rgba(139,92,246,0.15)]
+            focus:outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-primary focus:shadow-[0_0_0_4px_color-mix(in_srgb,var(--color-primary)_15%,transparent)]
             transition-all duration-300 shadow-inner group-hover:bg-white/80 dark:group-hover:bg-slate-800/80
             ${error ? "border-red-300 dark:border-red-500/50 focus:border-red-500 dark:focus:border-red-500 focus:shadow-[0_0_0_4px_rgba(239,68,68,0.15)]" : ""} 
             ${className}
