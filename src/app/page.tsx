@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, BookOpen, CheckCircle2, BarChart2, ArrowRight, FileText, ChevronDown, CheckSquare, Sparkles, Calendar, CalendarDays, CalendarRange, Clock, Star } from "lucide-react";
+import { Bell, BookOpen, CheckCircle2, BarChart2, ArrowRight, FileText, ChevronDown, CheckSquare, Sparkles, Calendar, CalendarDays, CalendarRange, Clock, Star, Sun, Moon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { NotificationsDrawer } from "@/components/NotificationsDrawer";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -10,7 +10,7 @@ import { mockTests } from "@/data/mockTests";
 export default function Home() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(true);
-  const { notificationsEnabled, notificationsMuted, savedTestIds, toggleSaveTest: contextToggleSaveTest } = useSettings();
+  const { theme, setTheme, notificationsEnabled, notificationsMuted, savedTestIds, toggleSaveTest: contextToggleSaveTest } = useSettings();
 
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>('month');
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
@@ -91,7 +91,18 @@ export default function Home() {
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out relative pb-8 max-w-[1400px] mx-auto overflow-hidden">
 
       {/* Header */}
-      <div className="flex justify-end items-start mb-10">
+      <div className="flex justify-end items-center gap-3 mb-10">
+        <button 
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="relative p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-sm hover:shadow-md transition-all text-slate-600 dark:text-slate-300 group"
+          title={theme === 'dark' ? "Yorug' rejimga o'tish" : "Tungi rejimga o'tish"}
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-5 h-5 group-hover:text-yellow-400 transition-colors" />
+          ) : (
+            <Moon className="w-5 h-5 group-hover:text-indigo-600 transition-colors" />
+          )}
+        </button>
 
         <button 
           onClick={handleOpenNotifications}
