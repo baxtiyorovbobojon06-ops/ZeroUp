@@ -219,19 +219,19 @@ export default function LessonPlanner() {
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   Qo'shimcha material (PDF, Word, Rasm) - ixtiyoriy
                 </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg bg-slate-50 relative hover:bg-slate-100 transition-colors cursor-pointer group">
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 dark:border-slate-700 border-dashed rounded-lg bg-slate-50 dark:bg-slate-800/50 relative hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer group">
                   <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-10 w-10 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                    <div className="flex text-sm text-slate-600 justify-center">
+                    <Upload className="mx-auto h-10 w-10 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors" />
+                    <div className="flex text-sm text-slate-600 dark:text-slate-400 justify-center">
                       <label htmlFor="file-upload" className="relative cursor-pointer bg-transparent rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
                         <span>{file ? file.name : "Fayl yuklang"}</span>
                         <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} accept=".pdf,.doc,.docx,image/*" />
                       </label>
                     </div>
-                    <p className="text-xs text-slate-500">PDF, Word yoki Rasm (Max: 5MB)</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">PDF, Word yoki Rasm (Max: 5MB)</p>
                   </div>
                 </div>
               </div>

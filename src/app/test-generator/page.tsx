@@ -97,52 +97,52 @@ export default function TestGenerator() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-1 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 h-fit">
+        <div className="lg:col-span-1 bg-white dark:bg-slate-800/80 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 h-fit">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Fan</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Fan</label>
               <input 
                 type="text" required
                 placeholder="Masalan: Biologiya"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                 value={formData.subject}
                 onChange={(e) => setFormData({...formData, subject: e.target.value})}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Sinf</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Sinf</label>
               <input 
                 type="text" required
                 placeholder="Masalan: 8"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                 value={formData.grade}
                 onChange={(e) => setFormData({...formData, grade: e.target.value})}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Mavzu</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mavzu</label>
               <input 
                 type="text" required
                 placeholder="Masalan: Yurak"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                 value={formData.topic}
                 onChange={(e) => setFormData({...formData, topic: e.target.value})}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Savollar</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Savollar</label>
                 <input 
                   type="number" required max="20" min="1"
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
                   value={formData.questionsCount}
                   onChange={(e) => setFormData({...formData, questionsCount: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Qiyinlik</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Qiyinlik</label>
                 <select 
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-slate-900 dark:text-slate-100"
                   value={formData.difficulty}
                   onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
                 >

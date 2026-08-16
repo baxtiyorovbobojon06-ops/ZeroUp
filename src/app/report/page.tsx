@@ -141,11 +141,11 @@ export default function ReportGenerator() {
               />
               
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Qisqa ma'lumot (davomat, yutuq va kamchiliklar)</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Qisqa ma'lumot (davomat, yutuq va kamchiliklar)</label>
                 <textarea 
                   required rows={5}
                   placeholder="26 nafar o'quvchidan 24 nafari qatnashdi. 18 tasi yaxshi tushundi. 6 tasiga qo'shimcha yordam kerak..."
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:focus:ring-violet-400 resize-none transition-colors"
                   value={formData.info}
                   onChange={(e) => setFormData({...formData, info: e.target.value})}
                 ></textarea>

@@ -115,13 +115,13 @@ export default function Grader() {
           <Card>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                   To'g'ri javob yoki topshiriq sharti
                 </label>
                 <textarea 
                   required rows={4}
                   placeholder="Masalan: Testning to'g'ri javoblari: 1-A, 2-B, 3-C. Yoki misolning sharti: 5x - 3 = 12..."
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none transition-colors"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 resize-none transition-colors"
                   value={assignment}
                   onChange={(e) => setAssignment(e.target.value)}
                 ></textarea>
@@ -129,7 +129,7 @@ export default function Grader() {
 
               <div>
                 <div className="flex justify-between items-end mb-2">
-                  <label className="block text-sm font-medium text-slate-700">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                     O'quvchilarning javob varaqalari (Rasmlar)
                   </label>
                   <span className="text-xs font-semibold px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">
@@ -137,12 +137,12 @@ export default function Grader() {
                   </span>
                 </div>
                 
-                <div className="mt-1 flex justify-center px-6 pt-6 pb-6 border-2 border-emerald-200 border-dashed rounded-xl bg-emerald-50/50 relative hover:bg-emerald-50 transition-colors cursor-pointer group">
-                  <div className="space-y-2 text-center">
-                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                      <ImageIcon2 className="w-6 h-6" />
+                <div className="mt-1 flex justify-center px-6 pt-6 pb-6 border-2 border-emerald-200 dark:border-emerald-800/50 border-dashed rounded-xl bg-emerald-50/50 dark:bg-emerald-900/10 relative hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors cursor-pointer group">
+                  <div className="space-y-1 text-center">
+                    <div className="mx-auto w-12 h-12 bg-white dark:bg-slate-800 rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <ImageIcon2 className="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
                     </div>
-                    <div className="flex text-sm text-slate-600 justify-center">
+                    <div className="flex text-sm text-slate-600 dark:text-slate-400 justify-center">
                       <label htmlFor="file-upload" className="relative cursor-pointer bg-transparent rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none">
                         <span>Rasmlarni tanlang (Bir nechta)</span>
                         <input id="file-upload" name="file-upload" type="file" multiple className="sr-only" onChange={handleFileChange} accept="image/*" />
