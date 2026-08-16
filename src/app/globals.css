@@ -2,18 +2,26 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #f8fafc; /* slate-50 */
+  --app-bg: #f8fafc;
+  --background: var(--app-bg); /* slate-50 */
   --foreground: #0f172a; /* slate-900 */
   
   /* Design Customization Defaults */
   --primary-color: #6366f1; /* indigo-600 */
   --neon-glow-color: #6366f1; 
   --icon-color: #6366f1;
+  
+  --neon-shadow: none;
 }
 
 .dark {
-  --background: #0f172a; /* slate-900 */
+  --app-bg-dark: #0f172a;
+  --background: var(--app-bg-dark); /* slate-900 */
   --foreground: #f8fafc; /* slate-50 */
+}
+
+.neon-mode {
+  --neon-shadow: 0 0 10px var(--neon-glow-color), 0 0 20px var(--neon-glow-color);
 }
 
 @theme inline {
@@ -70,7 +78,7 @@ body {
   }
   
   .neon-mode-shadow {
-    box-shadow: 0 0 10px var(--neon-glow-color), 0 0 20px var(--neon-glow-color);
+    box-shadow: var(--neon-shadow);
   }
   
   .neon-mode-text {

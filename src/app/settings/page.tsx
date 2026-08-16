@@ -17,9 +17,9 @@ type ViewState = 'main' | 'system' | 'language' | 'profile' | 'notifications' | 
 export default function SettingsPage() {
   const { 
     theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted,
-    neonMode, designTheme, primaryColor, neonGlowColor, iconColor,
+    neonMode, designTheme, primaryColor, neonGlowColor, iconColor, appBgColor, appBgColorDark,
     setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted,
-    setNeonMode, setDesignTheme, setPrimaryColor, setNeonGlowColor, setIconColor, t 
+    setNeonMode, setDesignTheme, setPrimaryColor, setNeonGlowColor, setIconColor, setAppBgColor, setAppBgColorDark, t 
   } = useSettings();
   
   const [currentView, setCurrentView] = useState<ViewState>('main');
@@ -497,15 +497,15 @@ export default function SettingsPage() {
 
       {/* Theme Presets */}
       <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60">
-        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Tayyor ranglar (Temalar)</h3>
+        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Tayyor ta'lim temalari</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
-            { id: 'default', name: 'Standart', hex: '#6366f1' },
-            { id: 'ocean', name: 'Okean', hex: '#0ea5e9' },
-            { id: 'emerald', name: 'Zumrad', hex: '#10b981' },
-            { id: 'cyberpunk', name: 'Kiberpank', hex: '#d946ef' },
-            { id: 'sunset', name: 'Quyosh botishi', hex: '#f97316' },
-            { id: 'ruby', name: 'Yoqut', hex: '#e11d48' },
+            { id: 'default', name: 'Klassik', hex: '#6366f1', bg: '#f8fafc', bgDark: '#0f172a' },
+            { id: 'ocean', name: 'Bilim dengizi', hex: '#0ea5e9', bg: '#f0f9ff', bgDark: '#082f49' },
+            { id: 'emerald', name: 'Zamonaviy maktab', hex: '#10b981', bg: '#f0fdf4', bgDark: '#022c22' },
+            { id: 'cyberpunk', name: 'Innovatsiya', hex: '#8b5cf6', bg: '#f5f3ff', bgDark: '#2e1065' },
+            { id: 'sunset', name: 'Energiya', hex: '#f97316', bg: '#fff7ed', bgDark: '#431407' },
+            { id: 'ruby', name: 'Faol ta\'lim', hex: '#e11d48', bg: '#fff1f2', bgDark: '#4c0519' },
           ].map(tPreset => (
             <button
               key={tPreset.id}
@@ -514,10 +514,12 @@ export default function SettingsPage() {
                 setPrimaryColor(tPreset.hex);
                 setNeonGlowColor(tPreset.hex);
                 setIconColor(tPreset.hex);
+                setAppBgColor(tPreset.bg);
+                setAppBgColorDark(tPreset.bgDark);
               }}
               className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${designTheme === tPreset.id ? 'border-2 border-slate-900 dark:border-white shadow-md' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
             >
-              <div className="w-8 h-8 rounded-full shadow-inner" style={{ backgroundColor: tPreset.hex }}></div>
+              <div className="w-8 h-8 rounded-full shadow-inner border border-black/10" style={{ backgroundColor: tPreset.hex }}></div>
               <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{tPreset.name}</span>
             </button>
           ))}

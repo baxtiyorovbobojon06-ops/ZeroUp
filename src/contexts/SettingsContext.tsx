@@ -33,11 +33,15 @@ interface SettingsContextType {
   primaryColor: string;
   neonGlowColor: string;
   iconColor: string;
+  appBgColor: string;
+  appBgColorDark: string;
   setNeonMode: (v: boolean) => void;
   setDesignTheme: (t: DesignTheme) => void;
   setPrimaryColor: (c: string) => void;
   setNeonGlowColor: (c: string) => void;
   setIconColor: (c: string) => void;
+  setAppBgColor: (c: string) => void;
+  setAppBgColorDark: (c: string) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -58,6 +62,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [primaryColor, setPrimaryColorState] = useState<string>('#6366f1'); // default indigo-600
   const [neonGlowColor, setNeonGlowColorState] = useState<string>('#6366f1');
   const [iconColor, setIconColorState] = useState<string>('#6366f1');
+  const [appBgColor, setAppBgColorState] = useState<string>('#f8fafc');
+  const [appBgColorDark, setAppBgColorDarkState] = useState<string>('#0f172a');
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -101,12 +107,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedPrimaryColor = localStorage.getItem('primaryColor');
     const savedNeonGlowColor = localStorage.getItem('neonGlowColor');
     const savedIconColor = localStorage.getItem('iconColor');
+    const savedAppBgColor = localStorage.getItem('appBgColor');
+    const savedAppBgColorDark = localStorage.getItem('appBgColorDark');
 
     if (savedNeonMode !== null) setNeonModeState(savedNeonMode === 'true');
     if (savedDesignTheme) setDesignThemeState(savedDesignTheme);
     if (savedPrimaryColor) setPrimaryColorState(savedPrimaryColor);
     if (savedNeonGlowColor) setNeonGlowColorState(savedNeonGlowColor);
     if (savedIconColor) setIconColorState(savedIconColor);
+    if (savedAppBgColor) setAppBgColorState(savedAppBgColor);
+    if (savedAppBgColorDark) setAppBgColorDarkState(savedAppBgColorDark);
     
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
@@ -137,10 +147,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('primaryColor', primaryColor);
       localStorage.setItem('neonGlowColor', neonGlowColor);
       localStorage.setItem('iconColor', iconColor);
+      localStorage.setItem('appBgColor', appBgColor);
+      localStorage.setItem('appBgColorDark', appBgColorDark);
 
       document.documentElement.style.setProperty('--primary-color', primaryColor);
       document.documentElement.style.setProperty('--neon-glow-color', neonGlowColor);
       document.documentElement.style.setProperty('--icon-color', iconColor);
+      document.documentElement.style.setProperty('--app-bg', appBgColor);
+      document.documentElement.style.setProperty('--app-bg-dark', appBgColorDark);
       
       if (neonMode) {
         document.documentElement.classList.add('neon-mode');
@@ -148,7 +162,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.classList.remove('neon-mode');
       }
     }
-  }, [theme, fontSize, fontFamily, neonMode, designTheme, primaryColor, neonGlowColor, iconColor, isLoaded]);
+  }, [theme, fontSize, fontFamily, neonMode, designTheme, primaryColor, neonGlowColor, iconColor, appBgColor, appBgColorDark, isLoaded]);
 
   const setTheme = (newTheme: Theme) => setThemeState(newTheme);
   
@@ -207,13 +221,21 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setIconColorState(c);
     if (isLoaded) localStorage.setItem('iconColor', c);
   };
+  const setAppBgColor = (c: string) => {
+    setAppBgColorState(c);
+    if (isLoaded) localStorage.setItem('appBgColor', c);
+  };
+  const setAppBgColorDark = (c: string) => {
+    setAppBgColorDarkState(c);
+    if (isLoaded) localStorage.setItem('appBgColorDark', c);
+  };
 
   return (
     <SettingsContext.Provider value={{ 
       theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted, savedTestIds,
-      neonMode, designTheme, primaryColor, neonGlowColor, iconColor,
+      neonMode, designTheme, primaryColor, neonGlowColor, iconColor, appBgColor, appBgColorDark,
       setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted, toggleSaveTest, t,
-      setNeonMode, setDesignTheme, setPrimaryColor, setNeonGlowColor, setIconColor
+      setNeonMode, setDesignTheme, setPrimaryColor, setNeonGlowColor, setIconColor, setAppBgColor, setAppBgColorDark
     }}>
       {children}
     </SettingsContext.Provider>
