@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileSignature, Plus, Trash2, BookOpen } from "lucide-react";
+import { FileSignature, Plus, Trash2, BookOpen, X, Sparkles, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -25,32 +25,58 @@ interface TestItem {
   _count?: { attempts: number };
 }
 
+interface GenerateTestPayload {
+  fan: string;
+  sinf: string;
+  mavzu: string;
+  savollarSoni: string;
+  qiyinlik: string;
+}
+
+// Simulates the AI generation call until the backend endpoint exists.
+async function mockGenerateTest(payload: GenerateTestPayload): Promise<TestItem> {
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+  return {
+    id: `mock-${Date.now()}`,
+    title: payload.mavzu,
+    subject: payload.fan,
+    date: new Date().toISOString(),
+    questionCount: parseInt(payload.savollarSoni) || 0,
+    answerKey: `AI tomonidan generatsiya qilingan (qiyinlik: ${payload.qiyinlik})`,
+    class: { id: "mock", name: payload.sinf },
+    _count: { attempts: 0 },
+  };
+}
+
+// TODO(backend): once POST /api/tests/generate is ready, replace the body
+// below with the real call and drop mockGenerateTest:
+//   const res = await fetch('/api/tests/generate', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify(payload),
+//   });
+//   if (!res.ok) throw new Error('generate failed');
+//   return res.json();
+async function generateTest(payload: GenerateTestPayload): Promise<TestItem> {
+  return mockGenerateTest(payload);
+}
+
+const initialGenForm: GenerateTestPayload = {
+  fan: "",
+  sinf: "",
+  mavzu: "",
+  savollarSoni: "5",
+  qiyinlik: "O'rta",
+};
+
 export default function TestsPage() {
   const [tests, setTests] = useState<TestItem[]>([]);
-  const [classes, setClasses] = useState<ClassItem[]>([]);
-
-  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Form State
-  const [classId, setClassId] = useState("");
-  const [subject, setSubject] = useState("");
-  const [title, setTitle] = useState("");
-  const [questionCount, setQuestionCount] = useState("20");
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [answerKey, setAnswerKey] = useState("");
-
-  const fetchClasses = () => {
-    fetch("/api/classes")
-      .then(res => res.json())
-      .then(data => {
-        setClasses(data);
-        if (data.length > 0) setClassId(data[0].id);
-      })
-      .catch(() => {
-        toast.error("Sinflarni yuklashda xatolik");
-      });
-  };
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState("");
+  const [genForm, setGenForm] = useState<GenerateTestPayload>(initialGenForm);
 
   const fetchTests = () => {
     fetch("/api/tests")
@@ -66,38 +92,35 @@ export default function TestsPage() {
   };
 
   useEffect(() => {
-    fetchClasses();
     fetchTests();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!classId || !subject || !title || !answerKey) {
-      return toast.error("Barcha maydonlarni to'ldiring");
+    if (!genForm.fan || !genForm.sinf || !genForm.mavzu) {
+      setGenerateError("Fan, sinf va mavzuni to'ldiring");
+      return;
     }
-    
+
+    setGenerating(true);
+    setGenerateError("");
     try {
-      const res = await fetch("/api/tests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          classId, subject, title, questionCount, date, answerKey
-        })
-      });
-      
-      if (res.ok) {
-        toast.success("Test muvaffaqiyatli yaratildi");
-        setShowForm(false);
-        setSubject("");
-        setTitle("");
-        setAnswerKey("");
-        fetchTests();
-      } else {
-        toast.error("Xatolik yuz berdi");
-      }
+      const newTest = await generateTest(genForm);
+      setTests(prev => [newTest, ...prev]);
+      toast.success("Test muvaffaqiyatli yaratildi");
+      setShowCreateModal(false);
+      setGenForm(initialGenForm);
     } catch {
-      toast.error("Xatolik yuz berdi");
+      setGenerateError("Test yaratib bo'lmadi, qayta urinib ko'ring.");
+    } finally {
+      setGenerating(false);
     }
+  };
+
+  const closeModal = () => {
+    if (generating) return;
+    setShowCreateModal(false);
+    setGenerateError("");
   };
 
   const handleDelete = async (id: string) => {
@@ -127,58 +150,13 @@ export default function TestsPage() {
         </div>
 
         <Button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => setShowCreateModal(true)}
           className="bg-amber-600 hover:bg-amber-700"
           leftIcon={<Plus className="w-5 h-5" />}
         >
           Yangi Test Yaratish
         </Button>
       </div>
-
-      {showForm && (
-        <Card className="p-6 bg-amber-50/30 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">Yangi test ma&apos;lumotlari</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Sinf</label>
-                <select
-                  value={classId}
-                  onChange={e => setClassId(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-white/60 dark:bg-slate-800/60 border-2 border-white/60 dark:border-slate-700/60 rounded-2xl focus:outline-none focus:border-primary text-slate-800 dark:text-slate-100 shadow-inner font-medium transition-all duration-300"
-                >
-                  {classes.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <Input label="Fan" type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Masalan: Matematika" />
-              <Input label="Test nomi" type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="Algebra - 3-test" />
-              <Input label="Sana" type="date" value={date} onChange={e => setDate(e.target.value)} />
-              <Input label="Savollar soni" type="number" min="1" max="100" value={questionCount} onChange={e => setQuestionCount(e.target.value)} />
-            </div>
-
-            <div className="pt-2">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Javob kaliti</label>
-              <textarea
-                rows={5}
-                value={answerKey}
-                onChange={e => setAnswerKey(e.target.value)}
-                placeholder="1-A, 2-B, 3-C, 4-D..."
-                className="w-full px-5 py-3.5 bg-white/60 dark:bg-slate-800/60 border-2 border-white/60 dark:border-slate-700/60 rounded-2xl focus:outline-none focus:border-primary text-slate-800 dark:text-slate-100 shadow-inner resize-none font-mono text-sm transition-all duration-300"
-              />
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Har bir savol raqami va uning javobini vergul bilan ajratib kiriting.</p>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
-              <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Bekor qilish</Button>
-              <Button type="submit" className="bg-amber-600 hover:bg-amber-700">Testni saqlash</Button>
-            </div>
-          </form>
-        </Card>
-      )}
 
       {loading ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -227,6 +205,85 @@ export default function TestsPage() {
               </div>
             </Card>
           ))}
+        </div>
+      )}
+
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">AI bilan test yaratish</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Mavzuni kiriting, AI savollarni tayyorlab beradi</p>
+              </div>
+              <button
+                onClick={closeModal}
+                disabled={generating}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors disabled:opacity-40"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleGenerate} className="p-5 space-y-4 overflow-y-auto">
+              <Input
+                label="Fan"
+                required
+                value={genForm.fan}
+                onChange={e => setGenForm({ ...genForm, fan: e.target.value })}
+                placeholder="Masalan: Biologiya"
+              />
+              <Input
+                label="Sinf"
+                required
+                value={genForm.sinf}
+                onChange={e => setGenForm({ ...genForm, sinf: e.target.value })}
+                placeholder="Masalan: 8"
+              />
+              <Input
+                label="Mavzu"
+                required
+                value={genForm.mavzu}
+                onChange={e => setGenForm({ ...genForm, mavzu: e.target.value })}
+                placeholder="Masalan: Yurak"
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Savollar soni"
+                  type="number" min="1" max="20"
+                  value={genForm.savollarSoni}
+                  onChange={e => setGenForm({ ...genForm, savollarSoni: e.target.value })}
+                />
+                <div className="flex flex-col gap-1.5 w-full">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 ml-1">Qiyinlik</label>
+                  <select
+                    value={genForm.qiyinlik}
+                    onChange={e => setGenForm({ ...genForm, qiyinlik: e.target.value })}
+                    className="w-full px-5 py-3.5 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm border-2 border-white/60 dark:border-slate-700/60 rounded-2xl text-slate-800 dark:text-slate-100 font-medium focus:outline-none focus:border-primary transition-all duration-300 shadow-inner"
+                  >
+                    <option value="Oson">Oson</option>
+                    <option value="O'rta">O&apos;rta</option>
+                    <option value="Qiyin">Qiyin</option>
+                  </select>
+                </div>
+              </div>
+
+              {generateError && (
+                <div className="p-3 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm rounded-xl flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <p>{generateError}</p>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button type="button" variant="outline" onClick={closeModal} disabled={generating}>Bekor qilish</Button>
+                <Button type="submit" isLoading={generating} leftIcon={<Sparkles className="w-4 h-4" />} className="bg-amber-600 hover:bg-amber-700">
+                  {generating ? "Yaratilmoqda..." : "Test yaratish"}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
