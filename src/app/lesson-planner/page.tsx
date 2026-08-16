@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useHistory } from "@/hooks/useHistory";
 
 interface LessonPhase {
@@ -183,14 +184,14 @@ export default function LessonPlanner() {
   const result: DeepPartial<AdvancedLessonPlan> | undefined = selectedResult ?? streamedResult;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+        <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shadow-sm">
           <BookOpen className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Ilg&apos;or Dars Rejasi (Jonli AI)</h1>
-          <p className="text-slate-500">Kutib turmasdan darhol dars rejasini ko&apos;ring</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Ilg&apos;or Dars Rejasi (Jonli AI)</h1>
+          <p className="text-slate-500 dark:text-slate-400">Kutib turmasdan darhol dars rejasini ko&apos;ring</p>
         </div>
       </div>
 
@@ -261,15 +262,15 @@ export default function LessonPlanner() {
           
           {history.length > 0 && (
             <Card>
-              <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-slate-400" />
                 Oxirgi Rejalar
               </h3>
               <div className="space-y-3">
                 {history.map((item, idx) => (
-                  <div key={idx} className="flex flex-col p-3 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer hover:border-blue-200 transition-colors" onClick={() => setSelectedResult(item)}>
-                    <span className="font-medium text-slate-800">{item.title || item.subject}</span>
-                    <span className="text-xs text-slate-500">{item.date}</span>
+                  <div key={idx} className="flex flex-col p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-700 cursor-pointer hover:border-blue-200 dark:hover:border-blue-500/40 transition-colors" onClick={() => setSelectedResult(item)}>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{item.title || item.subject}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{item.date}</span>
                   </div>
                 ))}
               </div>
@@ -287,12 +288,12 @@ export default function LessonPlanner() {
           
           {result && (
             <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-500">
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10 shadow-sm">
-                <h2 className="text-xl font-bold text-slate-900 line-clamp-1">
-                  {result.title || <span className="text-slate-300">Yozilmoqda...</span>}
+              <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800 sticky top-0 z-10 shadow-sm">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 line-clamp-1">
+                  {result.title || <span className="text-slate-300 dark:text-slate-600">Yozilmoqda...</span>}
                   {isLoading && <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full animate-ping"></span>}
                 </h2>
-                <button onClick={downloadPDF} disabled={isLoading} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors shrink-0 disabled:opacity-50" title="PDF yuklab olish">
+                <button onClick={downloadPDF} disabled={isLoading} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors shrink-0 disabled:opacity-50" title="PDF yuklab olish">
                   <Download className="w-5 h-5" />
                 </button>
               </div>
@@ -426,12 +427,13 @@ export default function LessonPlanner() {
           )}
           
           {!isLoading && !result && (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center absolute inset-0">
-              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                <BookOpen className="w-10 h-10 text-blue-200" />
-              </div>
-              <h3 className="text-lg font-medium text-slate-600 mb-2">Hali reja yaratilmagan</h3>
-              <p className="text-sm">Fayl yuklang va kerakli ma&apos;lumotlarni kiriting.</p>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <EmptyState
+                icon={BookOpen}
+                title="Hali reja yaratilmagan"
+                description="Fayl yuklang va kerakli ma'lumotlarni kiriting."
+                className="border-none bg-transparent"
+              />
             </div>
           )}
         </Card>
@@ -440,33 +442,33 @@ export default function LessonPlanner() {
       {/* Test Modal */}
       {isTestModalOpen && result?.quiz && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white">
-              <h2 className="text-lg font-bold text-slate-900">Dars Yakuni Testi ({result.quiz.length} ta savol)</h2>
-              <button onClick={() => setIsTestModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors">
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Dars Yakuni Testi ({result.quiz.length} ta savol)</h2>
+              <button onClick={() => setIsTestModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto space-y-6 bg-slate-50 flex-1">
+            <div className="p-6 overflow-y-auto space-y-6 bg-slate-50 dark:bg-slate-900/40 flex-1">
               {result.quiz.map((q, i) => (
-                <div key={i} className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm">
-                  <p className="font-bold text-slate-900 mb-3">{i + 1}. {q?.question}</p>
+                <div key={i} className="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <p className="font-bold text-slate-900 dark:text-slate-100 mb-3">{i + 1}. {q?.question}</p>
                   <div className="space-y-2 pl-2">
                     {q?.options?.map((opt, idx) => (
-                      <div key={idx} className="flex gap-3 text-sm text-slate-700 p-2 rounded-lg hover:bg-slate-50">
+                      <div key={idx} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50">
                         <span className="font-bold text-slate-400 w-5">{String.fromCharCode(65 + idx)})</span>
                         <span>{opt}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 text-sm text-emerald-600 font-bold flex items-center gap-2">
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 text-sm text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" /> To&apos;g&apos;ri javob: {q?.correct_answer}
                   </div>
                 </div>
               ))}
             </div>
-            <div className="p-4 border-t border-slate-100 bg-white flex justify-end">
-              <Button type="button" onClick={() => setIsTestModalOpen(false)} className="!bg-slate-200 hover:!bg-slate-300 !text-slate-800">
+            <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-end">
+              <Button type="button" onClick={() => setIsTestModalOpen(false)} className="!bg-slate-200 dark:!bg-slate-700 hover:!bg-slate-300 dark:hover:!bg-slate-600 !text-slate-800 dark:!text-slate-200">
                 Yopish
               </Button>
             </div>
