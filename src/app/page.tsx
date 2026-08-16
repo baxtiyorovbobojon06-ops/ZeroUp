@@ -364,7 +364,7 @@ export default function Home() {
 
       {/* Saved Tests Section */}
       {savedTestIds.length > 0 && (
-        <div className="mt-6 bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700">
+        <div id="saqlanganlar" className="mt-6 bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center gap-2 mb-6">
             <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
             <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Saqlangan testlar</h2>

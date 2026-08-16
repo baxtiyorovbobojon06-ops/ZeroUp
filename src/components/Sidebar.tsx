@@ -12,7 +12,8 @@ import {
   Settings,
   Sparkles,
   Menu,
-  X
+  X,
+  Star
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
@@ -22,6 +23,7 @@ const navItems = [
   { name: "Testlar", href: "/test-generator", icon: FileSignature },
   { name: "Tekshirish", href: "/grader", icon: CheckSquare },
   { name: "Hisobot", href: "/report", icon: FileBarChart },
+  { name: "Saqlanganlar", href: "/#saqlanganlar", icon: Star },
   { name: "Sozlanmalar", href: "/settings", icon: Settings },
 ];
 
