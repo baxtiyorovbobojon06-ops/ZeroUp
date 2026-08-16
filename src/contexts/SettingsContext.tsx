@@ -6,6 +6,7 @@ import { Language, translations } from '@/utils/translations';
 type Theme = 'light' | 'dark';
 type FontSize = 'sm' | 'base' | 'lg';
 type FontFamily = 'inter' | 'roboto' | 'nunito';
+export type DesignTheme = 'default' | 'ocean' | 'emerald' | 'cyberpunk' | 'sunset' | 'ruby' | 'custom';
 
 interface SettingsContextType {
   theme: Theme;
@@ -25,6 +26,18 @@ interface SettingsContextType {
   savedTestIds: string[];
   toggleSaveTest: (id: string) => void;
   t: (key: string) => string;
+  
+  // Design Settings
+  neonMode: boolean;
+  designTheme: DesignTheme;
+  primaryColor: string;
+  neonGlowColor: string;
+  iconColor: string;
+  setNeonMode: (v: boolean) => void;
+  setDesignTheme: (t: DesignTheme) => void;
+  setPrimaryColor: (c: string) => void;
+  setNeonGlowColor: (c: string) => void;
+  setIconColor: (c: string) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -38,6 +51,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [notificationsEnabled, setNotificationsState] = useState<boolean>(true);
   const [notificationsMuted, setNotificationsMutedState] = useState<boolean>(false);
   const [savedTestIds, setSavedTestIds] = useState<string[]>([]);
+  
+  // Design Settings State
+  const [neonMode, setNeonModeState] = useState<boolean>(false);
+  const [designTheme, setDesignThemeState] = useState<DesignTheme>('default');
+  const [primaryColor, setPrimaryColorState] = useState<string>('#6366f1'); // default indigo-600
+  const [neonGlowColor, setNeonGlowColorState] = useState<string>('#6366f1');
+  const [iconColor, setIconColorState] = useState<string>('#6366f1');
+
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -74,6 +95,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }
     }
     
+    // Load design settings
+    const savedNeonMode = localStorage.getItem('neonMode');
+    const savedDesignTheme = localStorage.getItem('designTheme') as DesignTheme;
+    const savedPrimaryColor = localStorage.getItem('primaryColor');
+    const savedNeonGlowColor = localStorage.getItem('neonGlowColor');
+    const savedIconColor = localStorage.getItem('iconColor');
+
+    if (savedNeonMode !== null) setNeonModeState(savedNeonMode === 'true');
+    if (savedDesignTheme) setDesignThemeState(savedDesignTheme);
+    if (savedPrimaryColor) setPrimaryColorState(savedPrimaryColor);
+    if (savedNeonGlowColor) setNeonGlowColorState(savedNeonGlowColor);
+    if (savedIconColor) setIconColorState(savedIconColor);
+    
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
   }, []);
@@ -96,8 +130,25 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('fontFamily', fontFamily);
       document.documentElement.classList.remove('font-inter', 'font-roboto', 'font-nunito');
       document.documentElement.classList.add(`font-${fontFamily}`);
+      
+      // Design settings
+      localStorage.setItem('neonMode', neonMode.toString());
+      localStorage.setItem('designTheme', designTheme);
+      localStorage.setItem('primaryColor', primaryColor);
+      localStorage.setItem('neonGlowColor', neonGlowColor);
+      localStorage.setItem('iconColor', iconColor);
+
+      document.documentElement.style.setProperty('--primary-color', primaryColor);
+      document.documentElement.style.setProperty('--neon-glow-color', neonGlowColor);
+      document.documentElement.style.setProperty('--icon-color', iconColor);
+      
+      if (neonMode) {
+        document.documentElement.classList.add('neon-mode');
+      } else {
+        document.documentElement.classList.remove('neon-mode');
+      }
     }
-  }, [theme, fontSize, fontFamily, isLoaded]);
+  }, [theme, fontSize, fontFamily, neonMode, designTheme, primaryColor, neonGlowColor, iconColor, isLoaded]);
 
   const setTheme = (newTheme: Theme) => setThemeState(newTheme);
   
@@ -136,10 +187,33 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     return translations[language][key] || key;
   };
 
+  const setNeonMode = (v: boolean) => {
+    setNeonModeState(v);
+    if (isLoaded) localStorage.setItem('neonMode', v.toString());
+  };
+  const setDesignTheme = (t: DesignTheme) => {
+    setDesignThemeState(t);
+    if (isLoaded) localStorage.setItem('designTheme', t);
+  };
+  const setPrimaryColor = (c: string) => {
+    setPrimaryColorState(c);
+    if (isLoaded) localStorage.setItem('primaryColor', c);
+  };
+  const setNeonGlowColor = (c: string) => {
+    setNeonGlowColorState(c);
+    if (isLoaded) localStorage.setItem('neonGlowColor', c);
+  };
+  const setIconColor = (c: string) => {
+    setIconColorState(c);
+    if (isLoaded) localStorage.setItem('iconColor', c);
+  };
+
   return (
     <SettingsContext.Provider value={{ 
       theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted, savedTestIds,
-      setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted, toggleSaveTest, t 
+      neonMode, designTheme, primaryColor, neonGlowColor, iconColor,
+      setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted, toggleSaveTest, t,
+      setNeonMode, setDesignTheme, setPrimaryColor, setNeonGlowColor, setIconColor
     }}>
       {children}
     </SettingsContext.Provider>

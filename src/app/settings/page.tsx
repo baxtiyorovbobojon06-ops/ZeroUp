@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, Moon, Sun, Globe, User, Save, Type, Monitor, ChevronRight, ChevronLeft, Check, Bell } from "lucide-react";
+import { Settings, Moon, Sun, Globe, User, Save, Type, Monitor, ChevronRight, ChevronLeft, Check, Bell, Palette, Zap } from "lucide-react";
 import toast from "react-hot-toast";
-import { useSettings } from "@/contexts/SettingsContext";
+import { useSettings, DesignTheme } from "@/contexts/SettingsContext";
 import { Language } from "@/utils/translations";
 
 import { Card } from "@/components/ui/Card";
@@ -12,12 +12,14 @@ import { Button } from "@/components/ui/Button";
 type FontSize = 'sm' | 'base' | 'lg';
 type FontFamily = 'inter' | 'roboto' | 'nunito';
 
-type ViewState = 'main' | 'system' | 'language' | 'profile' | 'notifications';
+type ViewState = 'main' | 'system' | 'language' | 'profile' | 'notifications' | 'design';
 
 export default function SettingsPage() {
   const { 
     theme, language, fontSize, fontFamily, profileName, notificationsEnabled, notificationsMuted,
-    setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted, t 
+    neonMode, designTheme, primaryColor, neonGlowColor, iconColor,
+    setTheme, setLanguage, setFontSize, setFontFamily, setProfileName, setNotificationsEnabled, setNotificationsMuted,
+    setNeonMode, setDesignTheme, setPrimaryColor, setNeonGlowColor, setIconColor, t 
   } = useSettings();
   
   const [currentView, setCurrentView] = useState<ViewState>('main');
@@ -69,6 +71,20 @@ export default function SettingsPage() {
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">{t("system_settings")}</h3>
           </div>
           <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+        </button>
+
+        {/* Design Settings List Item */}
+        <button 
+          onClick={() => setCurrentView('design')}
+          className="w-full flex items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group text-left"
+        >
+          <div className="p-3 bg-fuchsia-50 dark:bg-fuchsia-900/30 text-fuchsia-600 dark:text-fuchsia-400 rounded-xl shadow-[0_0_15px_rgba(217,70,239,0.4)] dark:shadow-[0_0_15px_rgba(217,70,239,0.2)] shrink-0 group-hover:scale-105 transition-transform">
+            <Palette className="w-6 h-6" />
+          </div>
+          <div className="ml-4 flex-1">
+            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Dizayn sozlanmalari</h3>
+          </div>
+          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-fuchsia-500 transition-colors" />
         </button>
 
         {/* Language List Item */}
@@ -442,6 +458,127 @@ export default function SettingsPage() {
         </div>
       )}
     </div>
+    </div>
+  );
+
+  const renderDesignView = () => (
+    <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+      <div className="flex items-center gap-3 mb-6">
+        <button 
+          onClick={() => setCurrentView('main')}
+          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-500"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Dizayn sozlanmalari</h2>
+      </div>
+
+      {/* Neon Mode Toggle */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60">
+        <div className="flex items-start gap-4">
+          <div className="p-3 bg-fuchsia-50 dark:bg-fuchsia-900/30 text-fuchsia-600 dark:text-fuchsia-400 rounded-xl shadow-[0_0_15px_rgba(217,70,239,0.4)] dark:shadow-[0_0_15px_rgba(217,70,239,0.2)] shrink-0">
+            <Zap className="w-6 h-6" />
+          </div>
+          <div className="flex-1 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-slate-100">Neon Rejim</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Yoritgichli neon effektlarini yoqish</p>
+              </div>
+              <button 
+                onClick={() => setNeonMode(!neonMode)}
+                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${neonMode ? 'bg-fuchsia-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+              >
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${neonMode ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Theme Presets */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60">
+        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Tayyor ranglar (Temalar)</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {[
+            { id: 'default', name: 'Standart', hex: '#6366f1' },
+            { id: 'ocean', name: 'Okean', hex: '#0ea5e9' },
+            { id: 'emerald', name: 'Zumrad', hex: '#10b981' },
+            { id: 'cyberpunk', name: 'Kiberpank', hex: '#d946ef' },
+            { id: 'sunset', name: 'Quyosh botishi', hex: '#f97316' },
+            { id: 'ruby', name: 'Yoqut', hex: '#e11d48' },
+          ].map(tPreset => (
+            <button
+              key={tPreset.id}
+              onClick={() => {
+                setDesignTheme(tPreset.id as DesignTheme);
+                setPrimaryColor(tPreset.hex);
+                setNeonGlowColor(tPreset.hex);
+                setIconColor(tPreset.hex);
+              }}
+              className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${designTheme === tPreset.id ? 'border-2 border-slate-900 dark:border-white shadow-md' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
+            >
+              <div className="w-8 h-8 rounded-full shadow-inner" style={{ backgroundColor: tPreset.hex }}></div>
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{tPreset.name}</span>
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* Custom Colors */}
+      <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60">
+        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Maxsus ranglar</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
+            <div>
+              <p className="font-medium text-slate-800 dark:text-slate-200">Asosiy tugmalar rangi</p>
+              <p className="text-xs text-slate-500">Platformadagi muhim tugmalar</p>
+            </div>
+            <input 
+              type="color" 
+              value={primaryColor} 
+              onChange={(e) => {
+                setPrimaryColor(e.target.value);
+                if (designTheme !== 'custom') setDesignTheme('custom');
+              }}
+              className="w-10 h-10 rounded cursor-pointer bg-transparent border-0"
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
+            <div>
+              <p className="font-medium text-slate-800 dark:text-slate-200">Neon yoritgich rangi</p>
+              <p className="text-xs text-slate-500">Soya va porlash effektlari</p>
+            </div>
+            <input 
+              type="color" 
+              value={neonGlowColor} 
+              onChange={(e) => {
+                setNeonGlowColor(e.target.value);
+                if (designTheme !== 'custom') setDesignTheme('custom');
+              }}
+              className="w-10 h-10 rounded cursor-pointer bg-transparent border-0"
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl">
+            <div>
+              <p className="font-medium text-slate-800 dark:text-slate-200">Sahifa ikonkalari rangi</p>
+              <p className="text-xs text-slate-500">Menyu va sarlavhalardagi belgilar</p>
+            </div>
+            <input 
+              type="color" 
+              value={iconColor} 
+              onChange={(e) => {
+                setIconColor(e.target.value);
+                if (designTheme !== 'custom') setDesignTheme('custom');
+              }}
+              className="w-10 h-10 rounded cursor-pointer bg-transparent border-0"
+            />
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 
   return (
@@ -464,6 +601,7 @@ export default function SettingsPage() {
       {currentView === 'language' && renderLanguageView()}
       {currentView === 'profile' && renderProfileView()}
       {currentView === 'notifications' && renderNotificationsView()}
+      {currentView === 'design' && renderDesignView()}
     </div>
   );
 }
