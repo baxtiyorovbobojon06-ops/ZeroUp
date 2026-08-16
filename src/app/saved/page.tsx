@@ -26,7 +26,7 @@ export default function SavedTestsPage() {
               <Star className="w-4 h-4 fill-current" /> {savedTestIds.length}
             </span>
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Barcha o'zingiz belgilagan testlar shu yerda turadi</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium">Barcha o&apos;zingiz belgilagan testlar shu yerda turadi</p>
         </div>
       </div>
 
@@ -69,7 +69,7 @@ export default function SavedTestsPage() {
                   {test.timeAgo}
                 </span>
                 <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0">
-                  Ko'rish &rarr;
+                  Ko&apos;rish &rarr;
                 </span>
               </div>
             </Link>
@@ -80,9 +80,9 @@ export default function SavedTestsPage() {
           <div className="w-24 h-24 bg-slate-100 dark:bg-slate-700/50 rounded-full flex items-center justify-center mb-6">
             <Star className="w-10 h-10 text-slate-300 dark:text-slate-500" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Hozircha saqlangan testlar yo'q</h2>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Hozircha saqlangan testlar yo&apos;q</h2>
           <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-            Testlarni saqlab qo'yish uchun asosiy sahifadagi "So'nggi faoliyatlar" bo'limida joylashgan yulduzcha ustiga bosing.
+            Testlarni saqlab qo&apos;yish uchun asosiy sahifadagi &quot;So&apos;nggi faoliyatlar&quot; bo&apos;limida joylashgan yulduzcha ustiga bosing.
           </p>
           <Link href="/" className="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-xl transition-colors shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20">
             Asosiy sahifaga qaytish

@@ -22,6 +22,18 @@ interface LessonPhase {
   student_action: string;
 }
 
+type DeepPartial<T> = T extends (infer U)[]
+  ? (DeepPartial<U> | undefined)[]
+  : T extends object
+    ? { [K in keyof T]?: DeepPartial<T[K]> }
+    : T;
+
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  correct_answer: string;
+}
+
 interface AdvancedLessonPlan {
   title: string;
   image_prompt?: string;
@@ -30,7 +42,7 @@ interface AdvancedLessonPlan {
   phases: LessonPhase[];
   assessment: string;
   homework: string;
-  quiz?: { question: string; options: string[]; correct_answer: string }[];
+  quiz?: QuizQuestion[];
   date?: string;
   grade?: string;
   subject?: string;
@@ -168,7 +180,7 @@ export default function LessonPlanner() {
   };
 
   // The active result is either the selected history item or the streaming object
-  const result: any = selectedResult || streamedResult;
+  const result: DeepPartial<AdvancedLessonPlan> | undefined = selectedResult ?? streamedResult;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -177,8 +189,8 @@ export default function LessonPlanner() {
           <BookOpen className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Ilg'or Dars Rejasi (Jonli AI)</h1>
-          <p className="text-slate-500">Kutib turmasdan darhol dars rejasini ko'ring</p>
+          <h1 className="text-2xl font-bold text-slate-900">Ilg&apos;or Dars Rejasi (Jonli AI)</h1>
+          <p className="text-slate-500">Kutib turmasdan darhol dars rejasini ko&apos;ring</p>
         </div>
       </div>
 
@@ -220,7 +232,7 @@ export default function LessonPlanner() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Qo'shimcha material (PDF, Word, Rasm) - ixtiyoriy
+                  Qo&apos;shimcha material (PDF, Word, Rasm) - ixtiyoriy
                 </label>
                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 dark:border-slate-700 border-dashed rounded-lg bg-slate-50 dark:bg-slate-800/50 relative hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer group">
                   <div className="space-y-1 text-center">
@@ -317,7 +329,7 @@ export default function LessonPlanner() {
                       <Target className="w-5 h-5 text-blue-600" /> Dars Maqsadlari
                     </h3>
                     <ul className="space-y-2">
-                      {result.objectives.map((obj: string, i: number) => (
+                      {result.objectives.map((obj, i) => (
                         <li key={i} className="flex items-start gap-3 text-slate-700">
                           <CheckCircle className="w-4 h-4 text-blue-500 mt-1 shrink-0" />
                           <span>{obj}</span>
@@ -332,7 +344,7 @@ export default function LessonPlanner() {
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Kerakli Jihozlar va Resurslar</h3>
                     <div className="flex flex-wrap gap-2">
-                      {result.resources.map((res: string, i: number) => (
+                      {result.resources.map((res, i) => (
                         <span key={i} className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium border border-slate-200">
                           {res}
                         </span>
@@ -346,7 +358,7 @@ export default function LessonPlanner() {
                   <div>
                     <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Dars Bosqichlari (Jarayon)</h3>
                     <div className="space-y-4">
-                      {result.phases.map((phase: any, i: number) => (
+                      {result.phases.map((phase, i) => (
                         <div key={i} className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
                           <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
                           <div className="flex justify-between items-center mb-4">
@@ -363,11 +375,11 @@ export default function LessonPlanner() {
                           
                           <div className="grid md:grid-cols-2 gap-4 mt-3">
                             <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                              <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">O'qituvchi</h5>
+                              <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">O&apos;qituvchi</h5>
                               <p className="text-sm text-slate-700 leading-relaxed">{phase?.teacher_action}</p>
                             </div>
                             <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
-                              <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">O'quvchi</h5>
+                              <h5 className="text-xs font-bold text-slate-500 uppercase mb-2">O&apos;quvchi</h5>
                               <p className="text-sm text-slate-700 leading-relaxed">{phase?.student_action}</p>
                             </div>
                           </div>
@@ -401,10 +413,10 @@ export default function LessonPlanner() {
                   <div className="bg-indigo-50 p-5 rounded-xl border border-indigo-100 flex justify-between items-center">
                     <div>
                       <h3 className="text-sm font-bold text-indigo-900 uppercase tracking-wider mb-1">Dars Yakuni Testi</h3>
-                      <p className="text-indigo-800 text-sm">O'quvchilar bilimini tekshirish uchun jami {result.quiz.length} ta test savoli tayyorlandi.</p>
+                      <p className="text-indigo-800 text-sm">O&apos;quvchilar bilimini tekshirish uchun jami {result.quiz.length} ta test savoli tayyorlandi.</p>
                     </div>
                     <Button type="button" onClick={() => setIsTestModalOpen(true)} className="!bg-indigo-600 hover:!bg-indigo-700 !text-white shrink-0 px-6">
-                      Testlarni ko'rish
+                      Testlarni ko&apos;rish
                     </Button>
                   </div>
                 )}
@@ -418,7 +430,7 @@ export default function LessonPlanner() {
                 <BookOpen className="w-10 h-10 text-blue-200" />
               </div>
               <h3 className="text-lg font-medium text-slate-600 mb-2">Hali reja yaratilmagan</h3>
-              <p className="text-sm">Fayl yuklang va kerakli ma'lumotlarni kiriting.</p>
+              <p className="text-sm">Fayl yuklang va kerakli ma&apos;lumotlarni kiriting.</p>
             </div>
           )}
         </Card>
@@ -435,19 +447,19 @@ export default function LessonPlanner() {
               </button>
             </div>
             <div className="p-6 overflow-y-auto space-y-6 bg-slate-50 flex-1">
-              {result.quiz.map((q: any, i: number) => (
+              {result.quiz.map((q, i) => (
                 <div key={i} className="p-5 bg-white rounded-xl border border-slate-200 shadow-sm">
-                  <p className="font-bold text-slate-900 mb-3">{i + 1}. {q.question}</p>
+                  <p className="font-bold text-slate-900 mb-3">{i + 1}. {q?.question}</p>
                   <div className="space-y-2 pl-2">
-                    {q.options?.map((opt: string, idx: number) => (
+                    {q?.options?.map((opt, idx) => (
                       <div key={idx} className="flex gap-3 text-sm text-slate-700 p-2 rounded-lg hover:bg-slate-50">
-                        <span className="font-bold text-slate-400 w-5">{String.fromCharCode(65 + idx)})</span> 
+                        <span className="font-bold text-slate-400 w-5">{String.fromCharCode(65 + idx)})</span>
                         <span>{opt}</span>
                       </div>
                     ))}
                   </div>
                   <div className="mt-4 pt-3 border-t border-slate-100 text-sm text-emerald-600 font-bold flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4" /> To'g'ri javob: {q.correct_answer}
+                    <CheckCircle className="w-4 h-4" /> To&apos;g&apos;ri javob: {q?.correct_answer}
                   </div>
                 </div>
               ))}

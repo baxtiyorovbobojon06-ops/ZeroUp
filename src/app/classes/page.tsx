@@ -6,22 +6,67 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import toast from "react-hot-toast";
 
+interface ClassItem {
+  id: string;
+  name: string;
+  academicYear: string | null;
+  description: string | null;
+  createdAt: string;
+  _count?: { students: number };
+}
+
+interface StudentItem {
+  id: string;
+  firstName: string;
+  lastName: string;
+  classId: string;
+  createdAt: string;
+}
+
 export default function ClassesPage() {
-  const [classes, setClasses] = useState<any[]>([]);
-  const [selectedClass, setSelectedClass] = useState<any>(null);
-  const [students, setStudents] = useState<any[]>([]);
-  
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
+  const [students, setStudents] = useState<StudentItem[]>([]);
+
   // Forms
   const [showClassForm, setShowClassForm] = useState(false);
   const [className, setClassName] = useState("");
   const [classYear, setClassYear] = useState(new Date().getFullYear().toString());
-  
+
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [studentFirstName, setStudentFirstName] = useState("");
   const [studentLastName, setStudentLastName] = useState("");
-  
+
   const [loading, setLoading] = useState(true);
   const [studentsLoading, setStudentsLoading] = useState(false);
+
+  const fetchClasses = () => {
+    fetch("/api/classes")
+      .then(res => res.json())
+      .then(data => {
+        setClasses(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        toast.error("Sinflarni yuklashda xatolik");
+        setLoading(false);
+      });
+  };
+
+  const fetchStudents = (classId: string) => {
+    Promise.resolve()
+      .then(() => setStudentsLoading(true))
+      .then(() => fetch(`/api/students?classId=${classId}`))
+      .then(res => res.json())
+      .then(data => {
+        setStudents(data);
+        setStudentsLoading(false);
+      })
+      .catch(() => {
+        toast.error("O'quvchilarni yuklashda xatolik");
+        setStudentsLoading(false);
+      });
+  };
 
   useEffect(() => {
     fetchClasses();
@@ -30,35 +75,8 @@ export default function ClassesPage() {
   useEffect(() => {
     if (selectedClass) {
       fetchStudents(selectedClass.id);
-    } else {
-      setStudents([]);
     }
   }, [selectedClass]);
-
-  const fetchClasses = async () => {
-    try {
-      const res = await fetch("/api/classes");
-      const data = await res.json();
-      setClasses(data);
-      setLoading(false);
-    } catch (err) {
-      toast.error("Sinflarni yuklashda xatolik");
-      setLoading(false);
-    }
-  };
-
-  const fetchStudents = async (classId: string) => {
-    setStudentsLoading(true);
-    try {
-      const res = await fetch(`/api/students?classId=${classId}`);
-      const data = await res.json();
-      setStudents(data);
-      setStudentsLoading(false);
-    } catch (err) {
-      toast.error("O'quvchilarni yuklashda xatolik");
-      setStudentsLoading(false);
-    }
-  };
 
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +120,8 @@ export default function ClassesPage() {
   const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentFirstName.trim() || !studentLastName.trim()) return toast.error("Ism va familiya kiriting");
-    
+    if (!selectedClass) return;
+
     try {
       const res = await fetch("/api/students", {
         method: "POST",
@@ -128,7 +147,8 @@ export default function ClassesPage() {
 
   const handleDeleteStudent = async (id: string) => {
     if (!confirm("O'quvchini o'chirasizmi?")) return;
-    
+    if (!selectedClass) return;
+
     try {
       const res = await fetch(`/api/students/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -148,8 +168,8 @@ export default function ClassesPage() {
           <Users2 className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Sinflar va O'quvchilar</h1>
-          <p className="text-slate-500">Barcha sinflarni va ulardagi o'quvchilarni boshqarish</p>
+          <h1 className="text-2xl font-bold text-slate-900">Sinflar va O&apos;quvchilar</h1>
+          <p className="text-slate-500">Barcha sinflarni va ulardagi o&apos;quvchilarni boshqarish</p>
         </div>
       </div>
 
@@ -163,7 +183,7 @@ export default function ClassesPage() {
               className="h-8 px-3 text-xs bg-indigo-600 hover:bg-indigo-700"
               leftIcon={<Plus className="w-4 h-4" />}
             >
-              Qo'shish
+              Qo&apos;shish
             </Button>
           </div>
 
@@ -182,7 +202,7 @@ export default function ClassesPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-600">O'quv yili</label>
+                  <label className="text-xs font-semibold text-slate-600">O&apos;quv yili</label>
                   <input 
                     type="text" 
                     value={classYear}
@@ -204,7 +224,7 @@ export default function ClassesPage() {
           ) : classes.length === 0 ? (
             <div className="text-center p-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
               <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-500">Hali sinflar yo'q</p>
+              <p className="text-sm text-slate-500">Hali sinflar yo&apos;q</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-[600px] overflow-y-auto custom-scrollbar pr-1">
@@ -221,7 +241,7 @@ export default function ClassesPage() {
                   <div>
                     <h3 className="font-bold text-lg">{c.name}</h3>
                     <p className={`text-xs ${selectedClass?.id === c.id ? "text-indigo-200" : "text-slate-500"}`}>
-                      {c.academicYear} • {c._count?.students || 0} o'quvchi
+                      {c.academicYear} • {c._count?.students || 0} o&apos;quvchi
                     </p>
                   </div>
                   <button 
@@ -245,22 +265,22 @@ export default function ClassesPage() {
               <div className="text-center">
                 <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                 <h3 className="font-medium text-slate-600">Sinf tanlanmagan</h3>
-                <p className="text-sm text-slate-500 mt-1">O'quvchilarni ko'rish uchun chapdan sinfni tanlang</p>
+                <p className="text-sm text-slate-500 mt-1">O&apos;quvchilarni ko&apos;rish uchun chapdan sinfni tanlang</p>
               </div>
             </div>
           ) : (
             <Card className="h-full flex flex-col">
               <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-800">{selectedClass.name} O'quvchilari</h2>
-                  <p className="text-sm text-slate-500">Jami {students.length} ta o'quvchi</p>
+                  <h2 className="text-xl font-bold text-slate-800">{selectedClass.name} O&apos;quvchilari</h2>
+                  <p className="text-sm text-slate-500">Jami {students.length} ta o&apos;quvchi</p>
                 </div>
                 <Button 
                   onClick={() => setShowStudentForm(!showStudentForm)}
                   className="bg-emerald-600 hover:bg-emerald-700"
                   leftIcon={<Plus className="w-4 h-4" />}
                 >
-                  O'quvchi qo'shish
+                  O&apos;quvchi qo&apos;shish
                 </Button>
               </div>
 
@@ -288,7 +308,7 @@ export default function ClassesPage() {
                         placeholder="Valiyev"
                       />
                     </div>
-                    <Button type="submit" className="bg-emerald-600 h-[38px]">Qo'shish</Button>
+                    <Button type="submit" className="bg-emerald-600 h-[38px]">Qo&apos;shish</Button>
                     <Button type="button" variant="outline" className="h-[38px]" onClick={() => setShowStudentForm(false)}>Yopish</Button>
                   </form>
                 </div>
@@ -300,7 +320,7 @@ export default function ClassesPage() {
                 ) : students.length === 0 ? (
                   <div className="text-center p-12">
                     <Users className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-                    <p className="text-slate-500">Bu sinfda hali o'quvchilar yo'q</p>
+                    <p className="text-slate-500">Bu sinfda hali o&apos;quvchilar yo&apos;q</p>
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-3">

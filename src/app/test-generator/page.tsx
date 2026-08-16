@@ -147,7 +147,7 @@ export default function TestGenerator() {
                   onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
                 >
                   <option value="Oson">Oson</option>
-                  <option value="O'rta">O'rta</option>
+                  <option value="O'rta">O&apos;rta</option>
                   <option value="Qiyin">Qiyin</option>
                 </select>
               </div>
@@ -224,7 +224,7 @@ export default function TestGenerator() {
               <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
                 <FileSignature className="w-8 h-8 text-slate-300 dark:text-slate-600" />
               </div>
-              <p>Chap tomondagi formani to'ldiring va<br/>test savollarini kuting.</p>
+              <p>Chap tomondagi formani to&apos;ldiring va<br/>test savollarini kuting.</p>
             </div>
           )}
         </div>

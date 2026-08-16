@@ -30,9 +30,21 @@ const schema = z.object({
   )
 });
 
+interface ClassItem {
+  id: string;
+  name: string;
+}
+
+interface TestItem {
+  id: string;
+  title: string;
+  questionCount: number;
+  answerKey: string;
+}
+
 export default function Grader() {
-  const [classes, setClasses] = useState<any[]>([]);
-  const [tests, setTests] = useState<any[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [tests, setTests] = useState<TestItem[]>([]);
   
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedTestId, setSelectedTestId] = useState("");
@@ -55,9 +67,6 @@ export default function Grader() {
         if (data.length > 0) setSelectedTestId(data[0].id);
         else setSelectedTestId("");
       });
-    } else {
-      setTests([]);
-      setSelectedTestId("");
     }
   }, [selectedClassId]);
 
@@ -191,7 +200,7 @@ export default function Grader() {
                 onChange={e => setSelectedClassId(e.target.value)}
                 className="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
               >
-                {classes.length === 0 && <option value="">Sinflar yo'q</option>}
+                {classes.length === 0 && <option value="">Sinflar yo&apos;q</option>}
                 {classes.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
@@ -206,7 +215,7 @@ export default function Grader() {
                 className="w-full px-3 py-2.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
                 disabled={!selectedClassId || tests.length === 0}
               >
-                {tests.length === 0 && <option value="">Testlar yo'q</option>}
+                {tests.length === 0 && <option value="">Testlar yo&apos;q</option>}
                 {tests.map(t => (
                   <option key={t.id} value={t.id}>{t.title} ({t.questionCount} ta savol)</option>
                 ))}
@@ -221,7 +230,7 @@ export default function Grader() {
               >
                 <Upload className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
                 <p className="text-sm font-medium text-slate-600">Rasmlarni yuklash</p>
-                <p className="text-xs text-slate-400 mt-1">Ko'pi bilan 30 ta rasm (JPG, PNG)</p>
+                <p className="text-xs text-slate-400 mt-1">Ko&apos;pi bilan 30 ta rasm (JPG, PNG)</p>
                 <input 
                   id="file-upload"
                   type="file" 
@@ -264,7 +273,7 @@ export default function Grader() {
               type="submit" 
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-base py-6"
               disabled={isLoading || files.length === 0 || !selectedTestId}
-              loading={isLoading}
+              isLoading={isLoading}
             >
               AIni ishga tushirish
             </Button>
@@ -272,7 +281,7 @@ export default function Grader() {
             {error && (
               <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                <p>AI tarmog'ida xatolik yuz berdi. Iltimos qaytadan urinib ko'ring.</p>
+                <p>AI tarmog&apos;ida xatolik yuz berdi. Iltimos qaytadan urinib ko&apos;ring.</p>
               </div>
             )}
           </form>
@@ -286,7 +295,7 @@ export default function Grader() {
                 <LayoutDashboard className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                 <h3 className="text-lg font-bold text-slate-700">Natijalar jadvali</h3>
                 <p className="text-slate-500 max-w-sm mx-auto mt-2 text-sm">
-                  Rasmlarni yuklang va AI orqali tekshirishni boshlang. Natijalar savolma-savol tahlil qilinib, shu yerda paydo bo'ladi.
+                  Rasmlarni yuklang va AI orqali tekshirishni boshlang. Natijalar savolma-savol tahlil qilinib, shu yerda paydo bo&apos;ladi.
                 </p>
               </div>
             </div>
@@ -296,11 +305,11 @@ export default function Grader() {
                 <div>
                   <h2 className="font-bold text-lg text-slate-800">Tahlil natijalari</h2>
                   <p className="text-sm text-slate-500">
-                    {result?.results?.length || 0} ta o'quvchi tekshirildi
+                    {result?.results?.length || 0} ta o&apos;quvchi tekshirildi
                   </p>
                 </div>
                 {hasResults && !isLoading && (
-                  <Button onClick={saveResults} loading={isSaving} className="bg-emerald-600" leftIcon={<Save className="w-4 h-4"/>}>
+                  <Button onClick={saveResults} isLoading={isSaving} className="bg-emerald-600" leftIcon={<Save className="w-4 h-4"/>}>
                     Bazaga saqlash
                   </Button>
                 )}
@@ -310,24 +319,24 @@ export default function Grader() {
                 <Card key={idx} className="overflow-hidden border-slate-200">
                   <div className="bg-slate-50 p-4 border-b flex flex-wrap items-center justify-between gap-4">
                     <div>
-                      <h3 className="font-bold text-lg text-slate-800">{res.student_name || 'Noaniq'}</h3>
+                      <h3 className="font-bold text-lg text-slate-800">{res?.student_name || 'Noaniq'}</h3>
                       <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 mt-1">
-                        <span className="bg-white px-2 py-1 rounded border">Variant: {res.variant || '-'}</span>
-                        <span className="bg-white px-2 py-1 rounded border">To'g'ri: {res.score || 0} ta</span>
+                        <span className="bg-white px-2 py-1 rounded border">Variant: {res?.variant || '-'}</span>
+                        <span className="bg-white px-2 py-1 rounded border">To&apos;g&apos;ri: {res?.score || 0} ta</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-black text-emerald-600">{res.percentage || 0}%</div>
+                      <div className="text-3xl font-black text-emerald-600">{res?.percentage || 0}%</div>
                     </div>
                   </div>
                   
                   <div className="p-4">
-                    <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">Savollar bo'yicha tahlil (Heatmap)</p>
+                    <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">Savollar bo&apos;yicha tahlil (Heatmap)</p>
                     <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
-                      {res.answers?.map((ans, aIdx) => {
-                        const isCorrect = ans.isCorrect;
-                        const isUnanswered = ans.studentAnswer === "-";
-                        const lowConfidence = (ans.confidence || 1) < 0.8;
+                      {res?.answers?.map((ans, aIdx) => {
+                        const isCorrect = ans?.isCorrect;
+                        const isUnanswered = ans?.studentAnswer === "-";
+                        const lowConfidence = (ans?.confidence || 1) < 0.8;
                         
                         let bgColor = "bg-slate-100 border-slate-200";
                         if (isCorrect) bgColor = "bg-emerald-100 border-emerald-200 text-emerald-800";
@@ -336,8 +345,8 @@ export default function Grader() {
                         
                         return (
                           <div key={aIdx} className={`relative flex flex-col items-center justify-center p-2 rounded-lg border ${bgColor} ${lowConfidence ? 'ring-2 ring-amber-400 border-transparent' : ''}`}>
-                            <span className="text-[10px] opacity-70 mb-0.5">{ans.question || aIdx+1}</span>
-                            <span className="font-bold">{ans.studentAnswer || '-'}</span>
+                            <span className="text-[10px] opacity-70 mb-0.5">{ans?.question || aIdx+1}</span>
+                            <span className="font-bold">{ans?.studentAnswer || '-'}</span>
                             {lowConfidence && (
                               <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse" title="AI ishonchi past (Ustoz tekshiruvi tavsiya etiladi)" />
                             )}
@@ -346,12 +355,12 @@ export default function Grader() {
                       })}
                     </div>
                     
-                    {res.answers?.some(a => (a.confidence || 1) < 0.8) && (
+                    {res?.answers?.some(a => (a?.confidence || 1) < 0.8) && (
                       <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-sm">
                         <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
                         <div>
                           <p className="font-semibold text-amber-800">Noaniq javoblar mavjud</p>
-                          <p className="text-amber-700 mt-0.5">Sariq nuqta bilan belgilangan savollarni qayta ko'zdan kechirishingiz tavsiya etiladi. AI ularni o'qishda qiynalgan bo'lishi mumkin.</p>
+                          <p className="text-amber-700 mt-0.5">Sariq nuqta bilan belgilangan savollarni qayta ko&apos;zdan kechirishingiz tavsiya etiladi. AI ularni o&apos;qishda qiynalgan bo&apos;lishi mumkin.</p>
                         </div>
                       </div>
                     )}

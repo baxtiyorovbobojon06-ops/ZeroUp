@@ -458,7 +458,7 @@ export default function SettingsPage() {
                   onClick={() => setConfirmModal({ isOpen: false, type: null })}
                   className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                 >
-                  Yo'q
+                  Yo&apos;q
                 </button>
                 <button 
                   onClick={() => {
@@ -472,7 +472,7 @@ export default function SettingsPage() {
                   }}
                   className={`flex-1 px-4 py-2 text-white rounded-xl font-medium transition-colors ${confirmModal.type === 'panel' ? 'bg-rose-500 hover:bg-rose-600' : 'bg-amber-500 hover:bg-amber-600'}`}
                 >
-                  Ha, o'chirish
+                  Ha, o&apos;chirish
                 </button>
               </div>
             </div>
@@ -519,7 +519,7 @@ export default function SettingsPage() {
 
       {/* Theme Presets */}
       <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-white/60 dark:border-slate-700/60">
-        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Tayyor ta'lim temalari</h3>
+        <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Tayyor ta&apos;lim temalari</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
             { id: 'default', name: 'Klassik', hex: '#6366f1', bg: '#f8fafc', bgDark: '#0f172a' },
@@ -618,7 +618,7 @@ export default function SettingsPage() {
               }}
             />
           </div>
-          <p className="text-xs text-slate-500 mt-4 text-center">Yorug'lik tugmasini siljitish orqali barcha qismlar uchun o'zingizga yoqqan yorqin rangni tanlang.</p>
+          <p className="text-xs text-slate-500 mt-4 text-center">Yorug&apos;lik tugmasini siljitish orqali barcha qismlar uchun o&apos;zingizga yoqqan yorqin rangni tanlang.</p>
         </div>
       </Card>
     </div>

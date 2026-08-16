@@ -61,18 +61,19 @@ const EditableText = ({ value, onSave, className }: { value: string, onSave: (va
 
 export default function SavedTestPage() {
   const params = useParams();
-  const router = useRouter();
-  const [test, setTest] = useState<SavedTest | null>(null);
+  const id = typeof params.id === "string" ? params.id : params.id?.[0];
+  // Remounting on id change lets the editable copy be initialized straight
+  // from the matching mock test, without an effect syncing state to the URL.
+  return <SavedTestEditor key={id} id={id} />;
+}
 
-  useEffect(() => {
-    if (params.id) {
-      const found = mockTests.find(t => t.id === params.id);
-      if (found) {
-        // Deep copy to avoid mutating the original mock data directly across navigations
-        setTest(JSON.parse(JSON.stringify(found)));
-      }
-    }
-  }, [params.id]);
+function SavedTestEditor({ id }: { id: string | undefined }) {
+  const router = useRouter();
+  const [test, setTest] = useState<SavedTest | null>(() => {
+    const found = mockTests.find(t => t.id === id);
+    // Deep copy to avoid mutating the original mock data directly across navigations
+    return found ? JSON.parse(JSON.stringify(found)) : null;
+  });
 
   if (!test) {
     return (
@@ -192,7 +193,7 @@ export default function SavedTestPage() {
                     </div>
                     {opt.isCorrect && (
                       <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40 px-2 py-1 rounded-md">
-                        To'g'ri javob
+                        To&apos;g&apos;ri javob
                       </span>
                     )}
                   </div>

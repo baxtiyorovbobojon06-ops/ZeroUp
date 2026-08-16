@@ -6,10 +6,26 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import toast from "react-hot-toast";
 
+interface ClassItem {
+  id: string;
+  name: string;
+}
+
+interface TestItem {
+  id: string;
+  title: string;
+  subject: string;
+  date: string;
+  questionCount: number;
+  answerKey: string;
+  class?: ClassItem;
+  _count?: { attempts: number };
+}
+
 export default function TestsPage() {
-  const [tests, setTests] = useState<any[]>([]);
-  const [classes, setClasses] = useState<any[]>([]);
-  
+  const [tests, setTests] = useState<TestItem[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -21,33 +37,35 @@ export default function TestsPage() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [answerKey, setAnswerKey] = useState("");
 
+  const fetchClasses = () => {
+    fetch("/api/classes")
+      .then(res => res.json())
+      .then(data => {
+        setClasses(data);
+        if (data.length > 0) setClassId(data[0].id);
+      })
+      .catch(() => {
+        toast.error("Sinflarni yuklashda xatolik");
+      });
+  };
+
+  const fetchTests = () => {
+    fetch("/api/tests")
+      .then(res => res.json())
+      .then(data => {
+        setTests(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        toast.error("Testlarni yuklashda xatolik");
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
     fetchClasses();
     fetchTests();
   }, []);
-
-  const fetchClasses = async () => {
-    try {
-      const res = await fetch("/api/classes");
-      const data = await res.json();
-      setClasses(data);
-      if (data.length > 0) setClassId(data[0].id);
-    } catch (err) {
-      toast.error("Sinflarni yuklashda xatolik");
-    }
-  };
-
-  const fetchTests = async () => {
-    try {
-      const res = await fetch("/api/tests");
-      const data = await res.json();
-      setTests(data);
-      setLoading(false);
-    } catch (err) {
-      toast.error("Testlarni yuklashda xatolik");
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +135,7 @@ export default function TestsPage() {
       {showForm && (
         <Card className="p-6 bg-amber-50/30 border-amber-200">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <h2 className="text-lg font-bold text-slate-800 mb-4">Yangi test ma'lumotlari</h2>
+            <h2 className="text-lg font-bold text-slate-800 mb-4">Yangi test ma&apos;lumotlari</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

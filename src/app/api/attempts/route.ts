@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/utils/db';
 
+interface GraderAnswer {
+  question: number;
+  studentAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+  confidence: number;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -46,8 +54,8 @@ export async function POST(req: Request) {
       
       // Create new attempt
       if (!attempt) {
-        const correctCount = res.answers?.filter((a: any) => a.isCorrect).length || 0;
-        const unansweredCount = res.answers?.filter((a: any) => a.studentAnswer === "-").length || 0;
+        const correctCount = res.answers?.filter((a: GraderAnswer) => a.isCorrect).length || 0;
+        const unansweredCount = res.answers?.filter((a: GraderAnswer) => a.studentAnswer === "-").length || 0;
         const totalCount = res.answers?.length || 1;
         const incorrectCount = totalCount - correctCount - unansweredCount;
         
@@ -61,9 +69,9 @@ export async function POST(req: Request) {
             correctCount,
             incorrectCount,
             unansweredCount,
-            needsReview: res.answers?.some((a: any) => (a.confidence || 1) < 0.8) || false,
+            needsReview: res.answers?.some((a: GraderAnswer) => (a.confidence || 1) < 0.8) || false,
             answers: {
-              create: res.answers?.map((ans: any) => ({
+              create: res.answers?.map((ans: GraderAnswer) => ({
                 questionNumber: ans.question,
                 studentAnswer: ans.studentAnswer,
                 correctAnswer: ans.correctAnswer,

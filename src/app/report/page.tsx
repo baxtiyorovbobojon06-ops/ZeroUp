@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { FileBarChart, ArrowLeft, BrainCircuit, Target, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -8,11 +8,37 @@ import { Card } from "@/components/ui/Card";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
+interface ReportAttempt {
+  id: string;
+  student: { firstName: string; lastName: string };
+  correctCount: number;
+  incorrectCount: number;
+  percentage: number;
+  needsReview: boolean;
+}
+
+interface ReportData {
+  title: string;
+  subject: string;
+  questionCount: number;
+  class?: { name: string };
+  reports?: { averageScore: number; highestScore: number; lowestScore: number }[];
+  attempts?: ReportAttempt[];
+  error?: string;
+}
+
+// Deterministic pseudo-random value in [0, 1), so the mock heatmap doesn't
+// reshuffle colors on every re-render (and stays a pure function of `seed`).
+function pseudoRandom(seed: number) {
+  const x = Math.sin(seed * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
 function ReportContent() {
   const searchParams = useSearchParams();
   const testId = searchParams.get('testId');
-  
-  const [data, setData] = useState<any>(null);
+
+  const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,17 +53,20 @@ function ReportContent() {
           toast.error("Xatolik yuz berdi");
           setLoading(false);
         });
-    } else {
-      setLoading(false);
     }
   }, [testId]);
+
+  const heatmapRatios = useMemo(
+    () => Array.from({ length: data?.questionCount || 0 }, (_, i) => pseudoRandom(i + 1)),
+    [data?.questionCount]
+  );
 
   if (!testId) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
         <FileBarChart className="w-16 h-16 text-slate-300 mb-4" />
         <h2 className="text-xl font-bold text-slate-700">Hisobot tanlanmagan</h2>
-        <p className="text-slate-500 mt-2 mb-6">Hisobotni ko'rish uchun Testlar yoki Asosiy sahifadan biror testni tanlang.</p>
+        <p className="text-slate-500 mt-2 mb-6">Hisobotni ko&apos;rish uchun Testlar yoki Asosiy sahifadan biror testni tanlang.</p>
         <Link href="/tests">
           <Button className="bg-indigo-600">Testlarga qaytish</Button>
         </Link>
@@ -68,23 +97,23 @@ function ReportContent() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">{data.title} - Hisobot</h1>
-            <p className="text-slate-500">{data.class?.name} • {data.subject} • {attempts.length} o'quvchi topshirgan</p>
+            <p className="text-slate-500">{data.class?.name} • {data.subject} • {attempts.length} o&apos;quvchi topshirgan</p>
           </div>
         </div>
       </div>
 
       {attempts.length === 0 ? (
         <Card className="p-12 text-center bg-slate-50 border-dashed">
-          <p className="text-slate-500">Hali bu test uchun natijalar kiritilmagan. Avval "Tekshirish" sahifasi orqali javoblarni tekshiring.</p>
+          <p className="text-slate-500">Hali bu test uchun natijalar kiritilmagan. Avval &quot;Tekshirish&quot; sahifasi orqali javoblarni tekshiring.</p>
           <Link href="/grader" className="mt-4 inline-block">
-            <Button className="bg-emerald-600">Tekshirishga o'tish</Button>
+            <Button className="bg-emerald-600">Tekshirishga o&apos;tish</Button>
           </Link>
         </Card>
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
-              <p className="text-sm font-medium text-slate-500 mb-1">O'rtacha natija</p>
+              <p className="text-sm font-medium text-slate-500 mb-1">O&apos;rtacha natija</p>
               <p className="text-3xl font-black text-indigo-600">{report?.averageScore?.toFixed(1) || 0}</p>
             </div>
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
@@ -105,26 +134,26 @@ function ReportContent() {
             <div className="space-y-6">
               <Card className="p-0 overflow-hidden">
                 <div className="p-5 border-b bg-slate-50/50">
-                  <h3 className="font-bold text-lg text-slate-800">O'quvchilar natijalari</h3>
+                  <h3 className="font-bold text-lg text-slate-800">O&apos;quvchilar natijalari</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm whitespace-nowrap">
                     <thead className="bg-slate-50 text-slate-600 font-semibold border-b">
                       <tr>
-                        <th className="px-5 py-3">O'quvchi</th>
-                        <th className="px-5 py-3">To'g'ri</th>
+                        <th className="px-5 py-3">O&apos;quvchi</th>
+                        <th className="px-5 py-3">To&apos;g&apos;ri</th>
                         <th className="px-5 py-3">Xato</th>
                         <th className="px-5 py-3">Natija</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {attempts.map((attempt: any) => (
+                      {attempts.map((attempt: ReportAttempt) => (
                         <tr key={attempt.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="px-5 py-3 font-medium text-slate-800">
                             {attempt.student.firstName} {attempt.student.lastName}
                             {attempt.needsReview && (
                               <span className="ml-2 inline-flex items-center gap-1 text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                                <AlertCircle className="w-3 h-3" /> Ko'rib chiqish kerak
+                                <AlertCircle className="w-3 h-3" /> Ko&apos;rib chiqish kerak
                               </span>
                             )}
                           </td>
@@ -144,12 +173,11 @@ function ReportContent() {
 
               {/* Heatmap Simulation (Question by Question overall stats) */}
               <Card className="p-5">
-                <h3 className="font-bold text-lg text-slate-800 mb-4">Savollar bo'yicha qiyinchilik (Heatmap)</h3>
+                <h3 className="font-bold text-lg text-slate-800 mb-4">Savollar bo&apos;yicha qiyinchilik (Heatmap)</h3>
                 <div className="grid grid-cols-10 gap-2">
                   {/* Mock logic: In a real scenario, we'd aggregate true/false for each question across all attempts */}
-                  {Array.from({length: data.questionCount}).map((_, i) => {
+                  {heatmapRatios.map((correctRatio, i) => {
                     // Just visualizing a mock aggregation for MVP
-                    const correctRatio = Math.random(); 
                     let colorClass = "bg-emerald-100 border-emerald-200 text-emerald-700";
                     if (correctRatio < 0.4) colorClass = "bg-red-100 border-red-200 text-red-700";
                     else if (correctRatio < 0.7) colorClass = "bg-amber-100 border-amber-200 text-amber-700";
@@ -162,8 +190,8 @@ function ReportContent() {
                   })}
                 </div>
                 <div className="flex items-center gap-4 mt-4 text-xs font-medium text-slate-500">
-                  <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-red-400 rounded-full"/> Qiyin (Ko'p xato qilingan)</div>
-                  <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-amber-400 rounded-full"/> O'rta</div>
+                  <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-red-400 rounded-full"/> Qiyin (Ko&apos;p xato qilingan)</div>
+                  <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-amber-400 rounded-full"/> O&apos;rta</div>
                   <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-emerald-400 rounded-full"/> Oson</div>
                 </div>
               </Card>
@@ -177,15 +205,15 @@ function ReportContent() {
                 </div>
                 <div className="space-y-4 text-sm text-indigo-50 leading-relaxed">
                   <p>
-                    Ushbu test natijalariga ko'ra, sinfning umumiy o'zlashtirishi qoniqarli, ammo ba'zi mavzularda bo'shliqlar mavjud. O'quvchilar asosan 4, 7 va 12-savollarda ko'p xato qilishgan.
+                    Ushbu test natijalariga ko&apos;ra, sinfning umumiy o&apos;zlashtirishi qoniqarli, ammo ba&apos;zi mavzularda bo&apos;shliqlar mavjud. O&apos;quvchilar asosan 4, 7 va 12-savollarda ko&apos;p xato qilishgan.
                   </p>
                   <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
                     <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
                       <Target className="w-4 h-4" /> Tavsiyalar
                     </h4>
                     <ul className="space-y-2 text-indigo-100 list-disc pl-4">
-                      <li>Kuchsiz o'zlashtirgan mavzularni (kasrlar qisqartirilishi ehtimoli katta) keyingi darsda qayta tushuntirish tavsiya etiladi.</li>
-                      <li>Past ko'rsatkich qayd etgan 3 nafar o'quvchi uchun qo'shimcha topshiriqlar ajratish kerak.</li>
+                      <li>Kuchsiz o&apos;zlashtirgan mavzularni (kasrlar qisqartirilishi ehtimoli katta) keyingi darsda qayta tushuntirish tavsiya etiladi.</li>
+                      <li>Past ko&apos;rsatkich qayd etgan 3 nafar o&apos;quvchi uchun qo&apos;shimcha topshiriqlar ajratish kerak.</li>
                     </ul>
                   </div>
                 </div>

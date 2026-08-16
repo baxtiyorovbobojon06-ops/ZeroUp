@@ -60,8 +60,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json(JSON.parse(content));
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Test Generator error:", error);
-    return NextResponse.json({ error: "Test yaratishda xatolik yuz berdi.", details: error.message }, { status: 500 });
+    const details = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: "Test yaratishda xatolik yuz berdi.", details }, { status: 500 });
   }
 }

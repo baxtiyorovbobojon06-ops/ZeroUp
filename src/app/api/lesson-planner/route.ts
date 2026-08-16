@@ -1,5 +1,5 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamObject } from 'ai';
+import { streamObject, type ModelMessage } from 'ai';
 import { z } from 'zod';
 import mammoth from 'mammoth';
 
@@ -78,15 +78,18 @@ Javobni aniq, o'qishga qulay va o'zbek tilida taqdim et.
       })).describe("Kamida 10 ta test savoli")
     });
 
-    const messages: any[] = [
+    const filePart = parsedFileData
+      ? (parsedFileData.mimeType.startsWith('image/')
+          ? { type: 'image' as const, image: parsedFileData.data }
+          : { type: 'file' as const, data: parsedFileData.data, mediaType: parsedFileData.mimeType })
+      : null;
+
+    const messages: ModelMessage[] = [
       {
         role: 'user',
         content: [
           { type: 'text', text: promptText },
-          ...(parsedFileData ? [{ 
-            type: parsedFileData.mimeType.startsWith('image/') ? 'image' : 'file', 
-            ...(parsedFileData.mimeType.startsWith('image/') ? { image: parsedFileData.data } : { data: parsedFileData.data, mimeType: parsedFileData.mimeType })
-          }] : [])
+          ...(filePart ? [filePart] : [])
         ]
       }
     ];
@@ -99,8 +102,9 @@ Javobni aniq, o'qishga qulay va o'zbek tilida taqdim et.
 
     return result.toTextStreamResponse();
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Lesson Planner API error:", error);
-    return new Response(JSON.stringify({ error: "Dars rejasini yaratishda xatolik yuz berdi.", details: error.message }), { status: 500 });
+    const details = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: "Dars rejasini yaratishda xatolik yuz berdi.", details }), { status: 500 });
   }
 }

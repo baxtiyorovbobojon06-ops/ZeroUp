@@ -9,7 +9,10 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
-    directUrl: process.env["DIRECT_URL"],
+    // CLI commands (migrate, db pull, validate) need the direct, non-pooled
+    // connection — the pgbouncer pooled DATABASE_URL doesn't support what the
+    // schema engine needs and causes these commands to hang. The running app
+    // still uses the pooled DATABASE_URL via the driver adapter in src/utils/db.ts.
+    url: process.env["DIRECT_URL"],
   },
 });

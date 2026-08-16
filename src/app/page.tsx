@@ -4,10 +4,27 @@ import Link from "next/link";
 import { Users, FileSignature, CheckSquare, BarChart2, ArrowRight, BookOpen, Clock, Calendar, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { Button } from "@/components/ui/Button";
+
+interface RecentTest {
+  id: string;
+  title: string;
+  date: string;
+  class?: { name: string };
+  _count?: { attempts: number };
+}
+
+interface Stats {
+  studentCount: number;
+  testCount: number;
+  attemptCount: number;
+  avgPercentage: number;
+  recentTests: RecentTest[];
+}
 
 export default function Home() {
   const { profileName } = useSettings();
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,7 +67,7 @@ export default function Home() {
             <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <Users className="w-5 h-5" />
             </div>
-            <p className="text-sm font-medium text-slate-500">Jami o'quvchilar</p>
+            <p className="text-sm font-medium text-slate-500">Jami o&apos;quvchilar</p>
           </div>
           <p className="text-3xl font-bold text-slate-900">
             {loading ? "..." : stats?.studentCount || 0}
@@ -86,7 +103,7 @@ export default function Home() {
             <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <BarChart2 className="w-5 h-5" />
             </div>
-            <p className="text-sm font-medium text-slate-500">O'rtacha natija</p>
+            <p className="text-sm font-medium text-slate-500">O&apos;rtacha natija</p>
           </div>
           <p className="text-3xl font-bold text-slate-900">
             {loading ? "..." : stats?.avgPercentage || 0}%
@@ -99,7 +116,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Clock className="w-5 h-5 text-slate-400" />
-              So'nggi testlar
+              So&apos;nggi testlar
             </h2>
             <Link href="/tests" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1">
               Barchasi <ArrowRight className="w-4 h-4" />
@@ -112,11 +129,11 @@ export default function Home() {
             ) : !stats?.recentTests || stats.recentTests.length === 0 ? (
               <div className="p-8 text-center bg-slate-50 border border-dashed rounded-xl flex flex-col items-center">
                 <BookOpen className="w-8 h-8 text-slate-300 mb-2" />
-                <p className="text-slate-500 text-sm">Hali testlar qo'shilmagan</p>
-                <Link href="/tests" className="text-indigo-600 text-sm font-medium mt-2">Test qo'shish</Link>
+                <p className="text-slate-500 text-sm">Hali testlar qo&apos;shilmagan</p>
+                <Link href="/tests" className="text-indigo-600 text-sm font-medium mt-2">Test qo&apos;shish</Link>
               </div>
             ) : (
-              stats.recentTests.map((test: any) => (
+              stats.recentTests.map((test: RecentTest) => (
                 <div key={test.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:border-slate-300 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
@@ -159,7 +176,7 @@ export default function Home() {
                 <Users className="w-5 h-5" />
               </div>
               <h3 className="font-bold text-lg mb-1">Sinflarni boshqarish</h3>
-              <p className="text-indigo-100 text-sm mb-4 opacity-90">Yangi sinf va o'quvchilarni qo'shing</p>
+              <p className="text-indigo-100 text-sm mb-4 opacity-90">Yangi sinf va o&apos;quvchilarni qo&apos;shing</p>
               <div className="flex items-center gap-2 text-sm font-medium hover:text-white transition-colors">
                 Boshlash <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>

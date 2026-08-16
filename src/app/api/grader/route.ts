@@ -1,5 +1,5 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamObject } from 'ai';
+import { streamObject, type UserContent } from 'ai';
 import { z } from 'zod';
 
 const google = createGoogleGenerativeAI({
@@ -58,7 +58,7 @@ Diqqat: Natijani faqat so'ralgan JSON formatida qaytar!
       )
     });
 
-    const messageContent: any[] = [{ type: 'text', text: promptText }];
+    const messageContent: UserContent = [{ type: 'text', text: promptText }];
     
     for (const img of images) {
       messageContent.push({
@@ -75,8 +75,9 @@ Diqqat: Natijani faqat so'ralgan JSON formatida qaytar!
 
     return result.toTextStreamResponse();
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Grader API error:", error);
-    return new Response(JSON.stringify({ error: "Tekshirishda xatolik yuz berdi.", details: error.message }), { status: 500 });
+    const details = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: "Tekshirishda xatolik yuz berdi.", details }), { status: 500 });
   }
 }
