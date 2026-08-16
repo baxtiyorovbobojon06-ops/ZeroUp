@@ -24,6 +24,28 @@ export default function SettingsPage() {
   
   const [currentView, setCurrentView] = useState<ViewState>('main');
   const [tempName, setTempName] = useState(profileName);
+  const [hueValue, setHueValue] = useState(250);
+
+  const hslToHex = (h: number, s: number, l: number) => {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = (n: number) => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  };
+
+  const handleHueChange = (val: string) => {
+    const h = parseInt(val);
+    setHueValue(h);
+    const hex = hslToHex(h, 80, 55);
+    setPrimaryColor(hex);
+    setNeonGlowColor(hex);
+    setIconColor(hex);
+    setDesignTheme('custom');
+  };
   
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -580,29 +602,23 @@ export default function SettingsPage() {
         </div>
 
         <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-700">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Ranglar palitrasi (Tezkor tanlash)</p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              '#f43f5e', '#ec4899', '#d946ef', '#a855f7', 
-              '#8b5cf6', '#6366f1', '#3b82f6', '#0ea5e9', 
-              '#06b6d4', '#14b8a6', '#10b981', '#22c55e', 
-              '#84cc16', '#eab308', '#f59e0b', '#f97316'
-            ].map(color => (
-              <button
-                key={color}
-                onClick={() => {
-                  setPrimaryColor(color);
-                  setNeonGlowColor(color);
-                  setIconColor(color);
-                  setDesignTheme('custom');
-                }}
-                className="w-8 h-8 rounded-full border border-black/10 shadow-sm hover:scale-110 transition-transform"
-                style={{ backgroundColor: color }}
-                title={color}
-              />
-            ))}
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-4">Ranglar palitrasi (Tezkor tanlash)</p>
+          <div className="relative flex items-center h-14 rounded-[2rem] p-1 bg-slate-100 dark:bg-slate-800 shadow-inner">
+            <input 
+              type="range" 
+              min="0" max="360" 
+              value={hueValue}
+              onChange={(e) => handleHueChange(e.target.value)}
+              className="w-full h-12 rounded-[2rem] appearance-none cursor-pointer outline-none 
+                         [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-10 [&::-webkit-slider-thumb]:h-10 
+                         [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-[0_2px_10px_rgba(0,0,0,0.3)]
+                         [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:active:scale-90"
+              style={{
+                background: `linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)`,
+              }}
+            />
           </div>
-          <p className="text-xs text-slate-500 mt-3">Yuqoridagi ranglardan birini tanlasangiz, u barcha maxsus ranglarga (tugma, neon, ikonka) bir xilda qo'llaniladi.</p>
+          <p className="text-xs text-slate-500 mt-4 text-center">Yorug'lik tugmasini siljitish orqali barcha qismlar uchun o'zingizga yoqqan yorqin rangni tanlang.</p>
         </div>
       </Card>
     </div>
