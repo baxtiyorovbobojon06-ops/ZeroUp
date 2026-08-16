@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, BookOpen, CheckCircle2, BarChart2, ArrowRight, FileText, ChevronDown, CheckSquare, Sparkles, Calendar, CalendarDays, CalendarRange, Clock } from "lucide-react";
-import { useState } from "react";
+import { Bell, BookOpen, CheckCircle2, BarChart2, ArrowRight, FileText, ChevronDown, CheckSquare, Sparkles, Calendar, CalendarDays, CalendarRange, Clock, Star } from "lucide-react";
+import { useState, useEffect } from "react";
 import { NotificationsDrawer } from "@/components/NotificationsDrawer";
 import { useSettings } from "@/contexts/SettingsContext";
 import { mockTests } from "@/data/mockTests";
@@ -14,6 +14,30 @@ export default function Home() {
 
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>('month');
   const [isTimeDropdownOpen, setIsTimeDropdownOpen] = useState(false);
+
+  const [savedTestIds, setSavedTestIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('savedTestIds');
+    if (saved) {
+      try {
+        setSavedTestIds(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse saved tests', e);
+      }
+    }
+  }, []);
+
+  const toggleSaveTest = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setSavedTestIds(prev => {
+      const newSaved = prev.includes(id) ? prev.filter(tId => tId !== id) : [...prev, id];
+      localStorage.setItem('savedTestIds', JSON.stringify(newSaved));
+      return newSaved;
+    });
+  };
 
   const timeLabels = {
     day: 'Bu kun',
@@ -62,6 +86,14 @@ export default function Home() {
   };
 
   const currentStats = statsData[timeRange];
+
+  const sortedMockTests = [...mockTests].sort((a, b) => {
+    const aSaved = savedTestIds.includes(a.id);
+    const bSaved = savedTestIds.includes(b.id);
+    if (aSaved && !bSaved) return -1;
+    if (!aSaved && bSaved) return 1;
+    return 0;
+  });
 
   const handleOpenNotifications = () => {
     setIsNotificationsOpen(true);
@@ -175,22 +207,35 @@ export default function Home() {
           <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-6">So&apos;nggi faoliyatlar</h2>
           
           <div className="flex-1 space-y-4 overflow-y-auto pr-2 max-h-[310px] custom-scrollbar">
-            {mockTests.map((test) => (
-              <Link key={test.id} href={`/saved-tests/${test.id}`} className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 p-2 -m-2 rounded-xl transition-colors">
-                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 rounded-xl flex items-center justify-center shrink-0">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate group-hover:text-indigo-600 transition-colors">
-                    {test.grade} {test.subject} - {test.title}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{test.timeAgo}</p>
-                </div>
-                <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/40 px-2.5 py-1 rounded-full shrink-0">
-                  Test
-                </span>
-              </Link>
-            ))}
+            {sortedMockTests.map((test) => {
+              const isSaved = savedTestIds.includes(test.id);
+              
+              return (
+                <Link key={test.id} href={`/saved-tests/${test.id}`} className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 p-2 -m-2 rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 rounded-xl flex items-center justify-center shrink-0">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate group-hover:text-indigo-600 transition-colors">
+                      {test.grade} {test.subject} - {test.title}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{test.timeAgo}</p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <button 
+                      onClick={(e) => toggleSaveTest(e, test.id)}
+                      className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors focus:outline-none"
+                      title={isSaved ? "Saqlanganlardan olib tashlash" : "Saqlanganlarga qo'shish"}
+                    >
+                      <Star className={`w-4 h-4 transition-colors ${isSaved ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300 dark:text-slate-600 hover:text-yellow-400 dark:hover:text-yellow-500'}`} />
+                    </button>
+                    <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/40 px-2 py-0.5 rounded-full">
+                      Test
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -316,6 +361,42 @@ export default function Home() {
         </div>
 
       </div>
+
+      {/* Saved Tests Section */}
+      {savedTestIds.length > 0 && (
+        <div className="mt-6 bg-white dark:bg-slate-800/80 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700">
+          <div className="flex items-center gap-2 mb-6">
+            <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Saqlangan testlar</h2>
+            <span className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full text-xs font-semibold ml-2">
+              {savedTestIds.length}
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {mockTests.filter(test => savedTestIds.includes(test.id)).map((test) => (
+              <Link key={`saved-${test.id}`} href={`/saved-tests/${test.id}`} className="flex items-center gap-4 group cursor-pointer bg-slate-50 hover:bg-slate-100 dark:bg-slate-700/40 dark:hover:bg-slate-700/80 p-3 rounded-2xl transition-colors border border-slate-100 dark:border-slate-700/50">
+                <div className="w-12 h-12 bg-white dark:bg-slate-800 shadow-sm text-yellow-500 rounded-xl flex items-center justify-center shrink-0">
+                  <Star className="w-6 h-6 fill-yellow-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate group-hover:text-yellow-600 dark:group-hover:text-yellow-500 transition-colors">
+                    {test.grade} {test.subject} - {test.title}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{test.timeAgo}</p>
+                </div>
+                <button 
+                  onClick={(e) => toggleSaveTest(e, test.id)}
+                  className="p-2 hover:bg-white dark:hover:bg-slate-600 rounded-xl transition-colors shadow-sm bg-slate-100 dark:bg-slate-700 shrink-0"
+                  title="Saqlanganlardan olib tashlash"
+                >
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 hover:opacity-70 transition-opacity" />
+                </button>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="text-center pt-8 pb-4">
