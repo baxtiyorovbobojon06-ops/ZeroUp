@@ -31,8 +31,8 @@ model Student {
 
 model Test {
   id            String    @id @default(uuid())
-  classId       String
-  class         Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  classId       String?
+  class         Class?    @relation(fields: [classId], references: [id], onDelete: SetNull)
   subject       String
   title         String
   questionCount Int
