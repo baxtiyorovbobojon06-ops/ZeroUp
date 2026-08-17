@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { CheckSquare, Upload, X, AlertCircle, Save, LayoutDashboard } from "lucide-react";
+import { ArrowLeft, Upload, X, AlertCircle, Save, Play, LayoutDashboard } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { experimental_useObject as useObject } from '@ai-sdk/react';
@@ -10,6 +11,7 @@ import { z } from 'zod';
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Select } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const schema = z.object({
@@ -45,14 +47,15 @@ interface TestItem {
 }
 
 export default function Grader() {
+  const router = useRouter();
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [tests, setTests] = useState<TestItem[]>([]);
-  
+
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedTestId, setSelectedTestId] = useState("");
-  
+
   const [files, setFiles] = useState<File[]>([]);
-  
+
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -87,11 +90,11 @@ export default function Grader() {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       const validFiles = newFiles.filter(f => f.type.startsWith('image/'));
-      
+
       if (validFiles.length !== newFiles.length) {
         toast.error("Iltimos, faqat rasm formatidagi fayllarni yuklang (JPG, PNG)");
       }
-      
+
       setFiles(prev => {
         const total = [...prev, ...validFiles];
         if (total.length > 30) {
@@ -108,8 +111,7 @@ export default function Grader() {
     setFiles(files.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!selectedClassId || !selectedTestId) {
       return toast.error("Sinf va testni tanlang");
     }
@@ -121,7 +123,7 @@ export default function Grader() {
     if (!test) return toast.error("Test topilmadi");
 
     toast.loading("Rasmlar bazaga tayyorlanmoqda...", { id: "graderLoad" });
-    
+
     try {
       const imagePromises = files.map(file => {
         return new Promise<{data: string; mimeType: string}>((resolve) => {
@@ -152,7 +154,7 @@ export default function Grader() {
   const saveResults = async () => {
     if (!result?.results || result.results.length === 0) return;
     setIsSaving(true);
-    
+
     try {
       const res = await fetch("/api/attempts", {
         method: "POST",
@@ -163,7 +165,7 @@ export default function Grader() {
           results: result.results
         })
       });
-      
+
       if (res.ok) {
         toast.success("Natijalar bazaga muvaffaqiyatli saqlandi!");
       } else {
@@ -178,199 +180,174 @@ export default function Grader() {
 
   const result = streamedResult;
   const hasResults = result?.results && result.results.length > 0;
+  const canSubmit = !isLoading && files.length > 0 && !!selectedTestId;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 max-w-7xl mx-auto">
+    <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shadow-sm">
-          <CheckSquare className="w-6 h-6" />
-        </div>
+        <button onClick={() => router.back()} className="p-1 text-[var(--text-secondary)]">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">AI Tekshiruvchi</h1>
-          <p className="text-slate-500 dark:text-slate-400">Testlarni Ommaviy Tekshirish va Heatmap tahlili</p>
+          <h1 className="text-lg font-medium text-[var(--text-primary)]">AI Tekshiruvchi</h1>
+          <p className="text-xs text-[var(--text-muted)]">Javob varaqalarini AI orqali tekshiring</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[350px_1fr] gap-6 items-start">
-        {/* Left Panel: Configuration */}
-        <Card className="sticky top-20">
-          <form onSubmit={handleSubmit} className="p-5 space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Sinfni tanlang</label>
-              <select
-                value={selectedClassId}
-                onChange={e => setSelectedClassId(e.target.value)}
-                className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border-2 border-white/60 dark:border-slate-700/60 rounded-2xl focus:outline-none focus:border-primary text-sm text-slate-800 dark:text-slate-100 shadow-inner transition-all duration-300"
-              >
-                {classes.length === 0 && <option value="">Sinflar yo&apos;q</option>}
-                {classes.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
+      <Card className="space-y-4">
+        <Select label="Sinf" value={selectedClassId} onChange={e => setSelectedClassId(e.target.value)}>
+          {classes.length === 0 && <option value="">Sinflar yo&apos;q</option>}
+          {classes.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </Select>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Testni tanlang</label>
-              <select
-                value={selectedTestId}
-                onChange={e => setSelectedTestId(e.target.value)}
-                className="w-full px-4 py-3 bg-white/60 dark:bg-slate-800/60 border-2 border-white/60 dark:border-slate-700/60 rounded-2xl focus:outline-none focus:border-primary text-sm text-slate-800 dark:text-slate-100 shadow-inner transition-all duration-300 disabled:opacity-50"
-                disabled={!selectedClassId || tests.length === 0}
-              >
-                {tests.length === 0 && <option value="">Testlar yo&apos;q</option>}
-                {tests.map(t => (
-                  <option key={t.id} value={t.id}>{t.title} ({t.questionCount} ta savol)</option>
-                ))}
-              </select>
-            </div>
+        <Select
+          label="Test"
+          value={selectedTestId}
+          onChange={e => setSelectedTestId(e.target.value)}
+          disabled={!selectedClassId || tests.length === 0}
+        >
+          {tests.length === 0 && <option value="">Testlar yo&apos;q</option>}
+          {tests.map(t => (
+            <option key={t.id} value={t.id}>{t.title} ({t.questionCount} ta savol)</option>
+          ))}
+        </Select>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Javob varaqalari (Rasmlar)</label>
-              <div
-                className="border-2 border-dashed border-emerald-200 dark:border-emerald-500/30 rounded-2xl p-6 text-center hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5 transition-colors cursor-pointer relative"
-                onClick={() => document.getElementById('file-upload')?.click()}
-              >
-                <Upload className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Rasmlarni yuklash</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Ko&apos;pi bilan 30 ta rasm (JPG, PNG)</p>
-                <input
-                  id="file-upload"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </div>
-            </div>
-
-            {files.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  <span>Yuklangan fayllar</span>
-                  <span>{files.length}/30</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {files.map((file, idx) => (
-                    <div key={idx} className="relative group rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 aspect-square bg-slate-50 dark:bg-slate-800">
-                      <Image
-                        src={URL.createObjectURL(file)}
-                        alt="preview"
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
-                        className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-5 h-5 text-white" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <Button 
-              type="submit" 
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-base py-6"
-              disabled={isLoading || files.length === 0 || !selectedTestId}
-              isLoading={isLoading}
-            >
-              AIni ishga tushirish
-            </Button>
-            
-            {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 text-sm rounded-xl flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                <p>AI tarmog&apos;ida xatolik yuz berdi. Iltimos qaytadan urinib ko&apos;ring.</p>
-              </div>
-            )}
-          </form>
-        </Card>
-
-        {/* Right Panel: Heatmap Results */}
-        <div className="space-y-4">
-          {!hasResults && !isLoading ? (
-            <EmptyState
-              icon={LayoutDashboard}
-              title="Natijalar jadvali"
-              description="Rasmlarni yuklang va AI orqali tekshirishni boshlang. Natijalar savolma-savol tahlil qilinib, shu yerda paydo bo'ladi."
-              className="h-[500px] justify-center"
+        <div>
+          <label className="text-xs font-medium text-[var(--text-secondary)]">Javob varaqalari (Rasmlar)</label>
+          <div
+            className="mt-1.5 border-2 border-dashed rounded-[var(--radius-card)] p-6 text-center cursor-pointer"
+            style={{ borderColor: "var(--input-border)" }}
+            onClick={() => document.getElementById('file-upload')?.click()}
+          >
+            <Upload className="w-7 h-7 mx-auto mb-2" style={{ color: "var(--accent-primary)" }} />
+            <p className="text-sm font-medium text-[var(--text-primary)]">Rasmlarni yuklash</p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">Ko&apos;pi bilan 30 ta rasm (JPG, PNG)</p>
+            <input
+              id="file-upload"
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
             />
-          ) : (
-            <>
-              <div className="flex items-center justify-between bg-white dark:bg-slate-800/60 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
-                <div>
-                  <h2 className="font-bold text-lg text-slate-800 dark:text-slate-100">Tahlil natijalari</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {result?.results?.length || 0} ta o&apos;quvchi tekshirildi
-                  </p>
-                </div>
-                {hasResults && !isLoading && (
-                  <Button onClick={saveResults} isLoading={isSaving} className="bg-emerald-600 hover:bg-emerald-700" leftIcon={<Save className="w-4 h-4"/>}>
-                    Bazaga saqlash
-                  </Button>
-                )}
-              </div>
-
-              {result?.results?.map((res, idx) => (
-                <Card key={idx} className="p-0 overflow-hidden">
-                  <div className="bg-slate-50 dark:bg-slate-800/60 p-4 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                      <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{res?.student_name || 'Noaniq'}</h3>
-                      <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                        <span className="bg-white dark:bg-slate-700 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">Variant: {res?.variant || '-'}</span>
-                        <span className="bg-white dark:bg-slate-700 px-2 py-1 rounded border border-slate-200 dark:border-slate-600">To&apos;g&apos;ri: {res?.score || 0} ta</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{res?.percentage || 0}%</div>
-                    </div>
-                  </div>
-
-                  <div className="p-4">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">Savollar bo&apos;yicha tahlil (Heatmap)</p>
-                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
-                      {res?.answers?.map((ans, aIdx) => {
-                        const isCorrect = ans?.isCorrect;
-                        const isUnanswered = ans?.studentAnswer === "-";
-                        const lowConfidence = (ans?.confidence || 1) < 0.8;
-
-                        let bgColor = "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700";
-                        if (isCorrect) bgColor = "bg-emerald-100 dark:bg-emerald-500/15 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300";
-                        else if (!isUnanswered) bgColor = "bg-red-100 dark:bg-red-500/15 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-300";
-                        else bgColor = "bg-slate-200 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300";
-
-                        return (
-                          <div key={aIdx} className={`relative flex flex-col items-center justify-center p-2 rounded-lg border ${bgColor} ${lowConfidence ? 'ring-2 ring-amber-400 border-transparent' : ''}`}>
-                            <span className="text-[10px] opacity-70 mb-0.5">{ans?.question || aIdx+1}</span>
-                            <span className="font-bold">{ans?.studentAnswer || '-'}</span>
-                            {lowConfidence && (
-                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse" title="AI ishonchi past (Ustoz tekshiruvi tavsiya etiladi)" />
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-
-                    {res?.answers?.some(a => (a?.confidence || 1) < 0.8) && (
-                      <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl flex items-start gap-3 text-sm">
-                        <AlertCircle className="w-5 h-5 text-amber-500 shrink-0" />
-                        <div>
-                          <p className="font-semibold text-amber-800 dark:text-amber-400">Noaniq javoblar mavjud</p>
-                          <p className="text-amber-700 dark:text-amber-400/80 mt-0.5">Sariq nuqta bilan belgilangan savollarni qayta ko&apos;zdan kechirishingiz tavsiya etiladi. AI ularni o&apos;qishda qiynalgan bo&apos;lishi mumkin.</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </>
-          )}
+          </div>
         </div>
+
+        {files.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs text-[var(--text-muted)]">
+              <span>Yuklangan fayllar</span>
+              <span>{files.length}/30</span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {files.map((file, idx) => (
+                <div key={idx} className="relative rounded-lg overflow-hidden border-[0.5px] aspect-square" style={{ borderColor: "var(--card-border)" }}>
+                  <Image src={URL.createObjectURL(file)} alt="preview" fill unoptimized className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); removeFile(idx); }}
+                    className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/50 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-3 rounded-[var(--radius)] text-sm flex items-start gap-2" style={{ background: "var(--danger-bg)", color: "var(--danger-text)" }}>
+            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+            <p>AI tarmog&apos;ida xatolik yuz berdi. Iltimos qaytadan urinib ko&apos;ring.</p>
+          </div>
+        )}
+      </Card>
+
+      <div className="flex flex-col items-center gap-3 py-2">
+        <button
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          className="w-[132px] h-[132px] rounded-full flex flex-col items-center justify-center gap-1.5 text-white transition-transform active:scale-95 disabled:opacity-50"
+          style={{ background: "var(--accent-primary)", border: "6px solid var(--accent-bg-tint)" }}
+        >
+          <Play className="w-7 h-7" fill="currentColor" />
+          <span className="text-sm font-medium">{isLoading ? "Tekshirilmoqda..." : "Tekshirish"}</span>
+        </button>
+        <p className="text-xs text-[var(--text-muted)] text-center max-w-[260px]">
+          Sinf, test va rasmlarni tanlagach, tekshirishni boshlash uchun tugmani bosing
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        {!hasResults && !isLoading ? (
+          <EmptyState
+            icon={LayoutDashboard}
+            title="Natijalar jadvali"
+            description="Rasmlarni yuklang va AI orqali tekshirishni boshlang. Natijalar shu yerda paydo bo'ladi."
+          />
+        ) : (
+          <>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-medium text-[var(--text-primary)]">Tahlil natijalari</h2>
+                <p className="text-xs text-[var(--text-muted)]">{result?.results?.length || 0} ta o&apos;quvchi tekshirildi</p>
+              </div>
+              {hasResults && !isLoading && (
+                <Button onClick={saveResults} isLoading={isSaving} leftIcon={<Save className="w-4 h-4" />}>Saqlash</Button>
+              )}
+            </div>
+
+            {result?.results?.map((res, idx) => (
+              <Card key={idx} className="p-0 overflow-hidden">
+                <div className="p-4 border-b-[0.5px]" style={{ borderColor: "var(--card-border)" }}>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium text-[var(--text-primary)]">{res?.student_name || 'Noaniq'}</h3>
+                    <div className="text-xl font-medium" style={{ color: "var(--accent-primary)" }}>{res?.percentage || 0}%</div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mt-1">
+                    <span>Variant: {res?.variant || '-'}</span>
+                    <span>To&apos;g&apos;ri: {res?.score || 0} ta</span>
+                  </div>
+                </div>
+
+                <div className="p-4">
+                  <p className="text-xs text-[var(--text-muted)] mb-3">Savollar bo&apos;yicha tahlil</p>
+                  <div className="grid grid-cols-5 gap-2">
+                    {res?.answers?.map((ans, aIdx) => {
+                      const isCorrect = ans?.isCorrect;
+                      const isUnanswered = ans?.studentAnswer === "-";
+                      const lowConfidence = (ans?.confidence || 1) < 0.8;
+
+                      let style: React.CSSProperties = { background: "var(--input-bg)", borderColor: "var(--card-border)", color: "var(--text-secondary)" };
+                      if (isCorrect) style = { background: "var(--success-bg)", borderColor: "var(--success-bg)", color: "var(--success-text)" };
+                      else if (!isUnanswered) style = { background: "var(--danger-bg)", borderColor: "var(--danger-bg)", color: "var(--danger-text)" };
+
+                      return (
+                        <div key={aIdx} className="relative flex flex-col items-center justify-center p-2 rounded-lg border" style={style}>
+                          <span className="text-[10px] opacity-70 mb-0.5">{ans?.question || aIdx + 1}</span>
+                          <span className="font-medium text-sm">{ans?.studentAnswer || '-'}</span>
+                          {lowConfidence && (
+                            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full" style={{ background: "var(--warning-text)" }} title="AI ishonchi past" />
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {res?.answers?.some(a => (a?.confidence || 1) < 0.8) && (
+                    <div className="mt-4 p-3 rounded-[var(--radius)] flex items-start gap-2 text-xs" style={{ background: "var(--warning-bg)", color: "var(--warning-text)" }}>
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <p>Sariq nuqta bilan belgilangan savollarni qayta ko&apos;zdan kechiring. AI ularni o&apos;qishda qiynalgan bo&apos;lishi mumkin.</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );

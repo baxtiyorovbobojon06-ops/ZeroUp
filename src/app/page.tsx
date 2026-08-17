@@ -2,27 +2,22 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { CheckSquare, FileSignature, ArrowRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { HeroClassCard } from "@/components/dashboard/HeroClassCard";
-import { QuickActionCard } from "@/components/dashboard/QuickActionCard";
 import { StatsRow } from "@/components/dashboard/StatsRow";
 import { HistoryList } from "@/components/dashboard/HistoryList";
-
-interface ClassItem {
-  id: string;
-  name: string;
-  _count?: { students: number };
-}
+import { Button } from "@/components/ui/Button";
 
 interface TestItem {
   id: string;
   title: string;
   date: string;
+  class?: { name: string } | null;
   _count?: { attempts: number };
 }
 
 interface Stats {
+  studentCount: number;
   testCount: number;
   attemptCount: number;
   avgPercentage: number;
@@ -31,117 +26,60 @@ interface Stats {
 export default function Home() {
   const { profileName } = useSettings();
 
-  const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [classesLoading, setClassesLoading] = useState(true);
-  const [classesError, setClassesError] = useState(false);
-
   const [stats, setStats] = useState<Stats | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
-  const [statsError, setStatsError] = useState(false);
 
   const [tests, setTests] = useState<TestItem[]>([]);
   const [testsLoading, setTestsLoading] = useState(true);
-  const [testsError, setTestsError] = useState(false);
 
   useEffect(() => {
-    fetch("/api/classes")
-      .then(r => r.json())
-      .then(data => {
-        setClasses(Array.isArray(data) ? data : []);
-        setClassesLoading(false);
-      })
-      .catch(() => {
-        setClassesError(true);
-        setClassesLoading(false);
-      });
-
     fetch("/api/stats")
       .then(r => r.json())
       .then(data => {
         setStats(data);
         setStatsLoading(false);
       })
-      .catch(() => {
-        setStatsError(true);
-        setStatsLoading(false);
-      });
+      .catch(() => setStatsLoading(false));
 
     fetch("/api/tests")
       .then(r => r.json())
       .then(data => {
-        setTests(Array.isArray(data) ? data.slice(0, 3) : []);
+        setTests(Array.isArray(data) ? data.slice(0, 5) : []);
         setTestsLoading(false);
       })
-      .catch(() => {
-        setTestsError(true);
-        setTestsLoading(false);
-      });
+      .catch(() => setTestsLoading(false));
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Xush kelibsiz</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Salom, {profileName} 👋</h1>
+          <p className="text-xs text-[var(--text-muted)]">Xush kelibsiz</p>
+          <p className="text-lg font-medium text-[var(--text-primary)]">{profileName}</p>
         </div>
-        <Link
-          href="/settings"
-          className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shrink-0 hover:bg-primary/20 transition-colors"
+        <div
+          className="w-10 h-10 rounded-full flex items-center justify-center font-medium shrink-0"
+          style={{ background: "var(--accent-bg-tint)", color: "var(--accent-primary-hover)" }}
         >
           {profileName ? profileName.charAt(0).toUpperCase() : "O'"}
-        </Link>
-      </div>
-
-      {classesError ? (
-        <div className="rounded-3xl border border-dashed border-red-200 dark:border-red-500/30 p-6 text-center text-sm text-red-500 dark:text-red-400">
-          Sinflarni yuklab bo&apos;lmadi
         </div>
-      ) : (
-        <HeroClassCard loading={classesLoading} classItem={classes[0] || null} hasMultiple={classes.length > 1} />
-      )}
-
-      <div className="grid grid-cols-2 gap-3">
-        <QuickActionCard
-          icon={CheckSquare}
-          label="Tekshirish"
-          href="/grader"
-          colorClass="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-        />
-        <QuickActionCard
-          icon={FileSignature}
-          label="Test"
-          href="/tests"
-          colorClass="bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400"
-        />
       </div>
+
+      <StatsRow
+        loading={statsLoading}
+        studentCount={stats?.studentCount || 0}
+        testCount={stats?.testCount || 0}
+        attemptCount={stats?.attemptCount || 0}
+        avgPercentage={stats?.avgPercentage || 0}
+      />
+
+      <Link href="/more/tests?new=1" className="block">
+        <Button className="w-full" leftIcon={<Plus className="w-4 h-4" />}>Yangi test</Button>
+      </Link>
 
       <div>
-        <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Statistika</h2>
-        {statsError ? (
-          <div className="text-center text-sm text-red-500 dark:text-red-400 py-4">Statistikani yuklab bo&apos;lmadi</div>
-        ) : (
-          <StatsRow
-            loading={statsLoading}
-            testCount={stats?.testCount || 0}
-            attemptCount={stats?.attemptCount || 0}
-            avgPercentage={stats?.avgPercentage || 0}
-          />
-        )}
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tarix</h2>
-          <Link href="/tests" className="text-xs font-semibold text-primary hover:opacity-80 flex items-center gap-1">
-            Barchasi <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-        {testsError ? (
-          <div className="text-center text-sm text-red-500 dark:text-red-400 py-4">Tarixni yuklab bo&apos;lmadi</div>
-        ) : (
-          <HistoryList loading={testsLoading} tests={tests} />
-        )}
+        <h2 className="text-xs font-medium text-[var(--text-muted)] mb-3">So&apos;nggi testlar</h2>
+        <HistoryList loading={testsLoading} tests={tests} />
       </div>
     </div>
   );

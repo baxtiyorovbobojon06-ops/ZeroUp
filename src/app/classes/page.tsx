@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Plus, Trash2, Users2, BookOpen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Plus, Trash2, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -27,11 +28,11 @@ interface StudentItem {
 }
 
 export default function ClassesPage() {
+  const router = useRouter();
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [selectedClass, setSelectedClass] = useState<ClassItem | null>(null);
   const [students, setStudents] = useState<StudentItem[]>([]);
 
-  // Forms
   const [showClassForm, setShowClassForm] = useState(false);
   const [className, setClassName] = useState("");
   const [classYear, setClassYear] = useState(new Date().getFullYear().toString());
@@ -84,7 +85,7 @@ export default function ClassesPage() {
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!className.trim()) return toast.error("Sinf nomi kiritilishi shart");
-    
+
     try {
       const res = await fetch("/api/classes", {
         method: "POST",
@@ -107,7 +108,7 @@ export default function ClassesPage() {
   const handleDeleteClass = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm("Sinf va uning barcha o'quvchilari o'chib ketadi. Rozimisiz?")) return;
-    
+
     try {
       const res = await fetch(`/api/classes/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -129,8 +130,8 @@ export default function ClassesPage() {
       const res = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          firstName: studentFirstName, 
+        body: JSON.stringify({
+          firstName: studentFirstName,
           lastName: studentLastName,
           classId: selectedClass.id
         })
@@ -141,7 +142,7 @@ export default function ClassesPage() {
         setStudentLastName("");
         setShowStudentForm(false);
         fetchStudents(selectedClass.id);
-        fetchClasses(); // Update count
+        fetchClasses();
       }
     } catch {
       toast.error("Xatolik yuz berdi");
@@ -165,91 +166,149 @@ export default function ClassesPage() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 max-w-6xl mx-auto">
+    <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center shadow-sm">
-          <Users2 className="w-6 h-6" />
-        </div>
+        <button onClick={() => router.back()} className="p-1 text-[var(--text-secondary)]">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Sinflar va O&apos;quvchilar</h1>
-          <p className="text-slate-500 dark:text-slate-400">Barcha sinflarni va ulardagi o&apos;quvchilarni boshqarish</p>
+          <h1 className="text-lg font-medium text-[var(--text-primary)]">Sinflar</h1>
+          <p className="text-xs text-[var(--text-muted)]">Barcha sinflarni va o&apos;quvchilarni boshqarish</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_2fr] gap-6">
-        {/* Classes List Panel */}
-        <div className="space-y-4">
+      <Button className="w-full" leftIcon={<Plus className="w-4 h-4" />} onClick={() => setShowClassForm(!showClassForm)}>
+        Yangi sinf qo&apos;shish
+      </Button>
+
+      {showClassForm && (
+        <Card className="space-y-3">
+          <form onSubmit={handleCreateClass} className="space-y-3">
+            <Input
+              label="Sinf nomi"
+              type="text"
+              value={className}
+              onChange={(e) => setClassName(e.target.value)}
+              placeholder="Masalan: 9-A"
+              autoFocus
+            />
+            <Input
+              label="O'quv yili"
+              type="text"
+              value={classYear}
+              onChange={(e) => setClassYear(e.target.value)}
+              placeholder="2026-2027"
+            />
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="secondary" onClick={() => setShowClassForm(false)}>Bekor qilish</Button>
+              <Button type="submit">Saqlash</Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-16 rounded-[var(--radius-card)]" />
+          ))}
+        </div>
+      ) : classes.length === 0 ? (
+        <EmptyState icon={Users} title="Hali sinflar yo'q" description="Yuqoridagi tugma orqali birinchi sinfingizni qo'shing." />
+      ) : (
+        <div className="space-y-2">
+          {classes.map(c => {
+            const isSelected = selectedClass?.id === c.id;
+            return (
+              <div
+                key={c.id}
+                onClick={() => setSelectedClass(isSelected ? null : c)}
+                className="p-4 rounded-[var(--radius-card)] border cursor-pointer flex items-center justify-between group"
+                style={isSelected
+                  ? { background: "var(--accent-bg-tint)", borderColor: "var(--accent-bg-strong)" }
+                  : { background: "var(--card-bg)", borderColor: "var(--card-border)" }}
+              >
+                <div>
+                  <h3 className="font-medium text-[var(--text-primary)]">{c.name}</h3>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {c.academicYear} • {c._count?.students || 0} o&apos;quvchi
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => handleDeleteClass(c.id, e)}
+                  className="p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--danger-text)]"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {selectedClass && (
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Sinflar ({classes.length})</h2>
-            <Button
-              onClick={() => setShowClassForm(!showClassForm)}
-              className="h-8 px-3 text-xs bg-indigo-600 hover:bg-indigo-700"
-              leftIcon={<Plus className="w-4 h-4" />}
+            <h2 className="text-sm font-medium text-[var(--text-primary)]">{selectedClass.name} o&apos;quvchilari</h2>
+            <button
+              onClick={() => setShowStudentForm(!showStudentForm)}
+              className="text-xs font-medium flex items-center gap-1"
+              style={{ color: "var(--accent-primary)" }}
             >
-              Qo&apos;shish
-            </Button>
+              <Plus className="w-3.5 h-3.5" /> Qo&apos;shish
+            </button>
           </div>
 
-          {showClassForm && (
-            <Card className="p-4 bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20">
-              <form onSubmit={handleCreateClass} className="space-y-3">
+          {showStudentForm && (
+            <Card className="space-y-3">
+              <form onSubmit={handleAddStudent} className="space-y-3">
                 <Input
-                  label="Sinf nomi (Masalan: 9-A)"
+                  label="Ism"
                   type="text"
-                  value={className}
-                  onChange={(e) => setClassName(e.target.value)}
-                  placeholder="9-A"
+                  value={studentFirstName}
+                  onChange={(e) => setStudentFirstName(e.target.value)}
+                  placeholder="Ali"
                   autoFocus
                 />
                 <Input
-                  label="O'quv yili"
+                  label="Familiya"
                   type="text"
-                  value={classYear}
-                  onChange={(e) => setClassYear(e.target.value)}
-                  placeholder="2026-2027"
+                  value={studentLastName}
+                  onChange={(e) => setStudentLastName(e.target.value)}
+                  placeholder="Valiyev"
                 />
                 <div className="flex gap-2 justify-end">
-                  <Button type="button" variant="outline" className="h-9 text-xs" onClick={() => setShowClassForm(false)}>Bekor qilish</Button>
-                  <Button type="submit" className="h-9 text-xs bg-indigo-600 hover:bg-indigo-700">Saqlash</Button>
+                  <Button type="button" variant="secondary" onClick={() => setShowStudentForm(false)}>Bekor qilish</Button>
+                  <Button type="submit">Saqlash</Button>
                 </div>
               </form>
             </Card>
           )}
 
-          {loading ? (
+          {studentsLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <Skeleton className="w-2/3 h-5 mb-2" />
-                  <Skeleton className="w-1/3 h-3" />
-                </div>
+                <Skeleton key={i} className="h-12 rounded-[var(--radius-card)]" />
               ))}
             </div>
-          ) : classes.length === 0 ? (
-            <EmptyState icon={Users} title="Hali sinflar yo'q" description="Yuqoridagi tugma orqali birinchi sinfingizni qo'shing." />
+          ) : students.length === 0 ? (
+            <EmptyState icon={Users} title="Bu sinfda hali o'quvchilar yo'q" description="Yuqoridagi tugma orqali o'quvchi qo'shing." />
           ) : (
-            <div className="space-y-2 max-h-[600px] overflow-y-auto custom-scrollbar pr-1">
-              {Array.isArray(classes) && classes.map(c => (
-                <div
-                  key={c.id}
-                  onClick={() => setSelectedClass(c)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between group ${
-                    selectedClass?.id === c.id
-                      ? "bg-primary text-white border-transparent shadow-md"
-                      : "bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-primary/40 hover:shadow-sm"
-                  }`}
-                >
-                  <div>
-                    <h3 className="font-bold text-lg">{c.name}</h3>
-                    <p className={`text-xs ${selectedClass?.id === c.id ? "text-white/80" : "text-slate-500 dark:text-slate-400"}`}>
-                      {c.academicYear} • {c._count?.students || 0} o&apos;quvchi
-                    </p>
+            <div className="space-y-2">
+              {students.map((student) => (
+                <div key={student.id} className="flex items-center justify-between p-3 rounded-[var(--radius-card)] bg-[var(--card-bg)] border-[0.5px] border-[var(--card-border)]">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0"
+                      style={{ background: "var(--accent-bg-tint)", color: "var(--accent-primary-hover)" }}
+                    >
+                      {student.firstName.charAt(0).toUpperCase()}
+                    </div>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{student.firstName} {student.lastName}</p>
                   </div>
                   <button
-                    onClick={(e) => handleDeleteClass(c.id, e)}
-                    className={`p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity ${
-                      selectedClass?.id === c.id ? "hover:bg-white/20 text-white/80" : "hover:bg-red-50 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500"
-                    }`}
+                    onClick={() => handleDeleteStudent(student.id)}
+                    className="p-1.5 text-[var(--text-muted)] hover:text-[var(--danger-text)]"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -258,96 +317,7 @@ export default function ClassesPage() {
             </div>
           )}
         </div>
-
-        {/* Students List Panel */}
-        <div>
-          {!selectedClass ? (
-            <div className="h-full min-h-[400px] flex items-center justify-center">
-              <EmptyState icon={BookOpen} title="Sinf tanlanmagan" description="O'quvchilarni ko'rish uchun chapdan sinfni tanlang" className="border-none bg-transparent" />
-            </div>
-          ) : (
-            <Card className="h-full flex flex-col">
-              <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{selectedClass.name} O&apos;quvchilari</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Jami {students.length} ta o&apos;quvchi</p>
-                </div>
-                <Button
-                  onClick={() => setShowStudentForm(!showStudentForm)}
-                  className="bg-emerald-600 hover:bg-emerald-700"
-                  leftIcon={<Plus className="w-4 h-4" />}
-                >
-                  O&apos;quvchi qo&apos;shish
-                </Button>
-              </div>
-
-              {showStudentForm && (
-                <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-emerald-50/30 dark:bg-emerald-500/5">
-                  <form onSubmit={handleAddStudent} className="flex items-end gap-3">
-                    <div className="flex-1">
-                      <Input
-                        label="Ism"
-                        type="text"
-                        value={studentFirstName}
-                        onChange={(e) => setStudentFirstName(e.target.value)}
-                        placeholder="Ali"
-                        autoFocus
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <Input
-                        label="Familiya"
-                        type="text"
-                        value={studentLastName}
-                        onChange={(e) => setStudentLastName(e.target.value)}
-                        placeholder="Valiyev"
-                      />
-                    </div>
-                    <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 h-[46px]">Qo&apos;shish</Button>
-                    <Button type="button" variant="outline" className="h-[46px]" onClick={() => setShowStudentForm(false)}>Yopish</Button>
-                  </form>
-                </div>
-              )}
-
-              <div className="flex-1 p-5 overflow-y-auto custom-scrollbar">
-                {studentsLoading ? (
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
-                        <Skeleton className="w-8 h-8 rounded-full shrink-0" />
-                        <Skeleton className="w-2/3 h-4" />
-                      </div>
-                    ))}
-                  </div>
-                ) : students.length === 0 ? (
-                  <EmptyState icon={Users} title="Bu sinfda hali o'quvchilar yo'q" description="Yuqoridagi tugma orqali o'quvchi qo'shing." className="border-none bg-transparent" />
-                ) : (
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    {students.map((student, idx) => (
-                      <div key={student.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/60 hover:border-emerald-200 dark:hover:border-emerald-500/40 hover:shadow-sm transition-all group">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center text-xs font-bold">
-                            {idx + 1}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-slate-800 dark:text-slate-100">{student.firstName} {student.lastName}</p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteStudent(student.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md opacity-0 group-hover:opacity-100 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Card>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
