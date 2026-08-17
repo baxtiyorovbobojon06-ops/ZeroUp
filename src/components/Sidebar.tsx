@@ -41,7 +41,6 @@ export default function Sidebar() {
             <Sparkles className="text-white w-4 h-4" />
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Xush kelibsiz</span>
             <span className="text-sm font-bold text-primary truncate max-w-[120px]">
               {profileName} 👋
             </span>
@@ -70,7 +69,6 @@ export default function Sidebar() {
               <Sparkles className="text-white w-5 h-5" />
             </div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Xush kelibsiz</span>
               <span className="text-lg font-bold text-primary truncate">
                 {profileName} 👋
               </span>
@@ -122,7 +120,8 @@ export default function Sidebar() {
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{profileName || "O'qituvchi"}</p>
-              <p className="text-xs font-semibold text-primary tracking-wide">{t("PRO TARIF")}</p>
+              {/* Pullik tarif tizimi hali ishlab chiqilmagan — vaqtincha yashirilgan */}
+              {/* <p className="text-xs font-semibold text-primary tracking-wide">{t("PRO TARIF")}</p> */}
             </div>
           </Link>
         </div>
