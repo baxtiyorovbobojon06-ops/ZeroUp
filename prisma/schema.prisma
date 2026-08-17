@@ -97,3 +97,61 @@ model Report {
   aiRecommendation String?
   createdAt        DateTime  @default(now())
 }
+
+model LiveSession {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  subject       String
+  topic         String
+  grade         String?
+  difficulty    String?
+  durationSec   Int       @default(300)
+  status        String    @default("waiting") // waiting | active | finished
+  startedAt     DateTime?
+  endsAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  questions     LiveQuestion[]
+  participants  LiveParticipant[]
+}
+
+model LiveQuestion {
+  id            String    @id @default(uuid())
+  sessionId     String
+  session       LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  order         Int
+  question      String
+  options       String    // JSON array of option strings
+  correctAnswer String
+  explanation   String?
+
+  answers       LiveAnswer[]
+}
+
+model LiveParticipant {
+  id            String    @id @default(uuid())
+  sessionId     String
+  session       LiveSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  name          String
+  questionOrder String    // JSON array of LiveQuestion ids, shuffled per participant
+  joinedAt      DateTime  @default(now())
+  submittedAt   DateTime?
+  score         Float?
+  correctCount  Int?
+
+  answers       LiveAnswer[]
+
+  @@unique([sessionId, name])
+}
+
+model LiveAnswer {
+  id             String   @id @default(uuid())
+  participantId  String
+  participant    LiveParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       LiveQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswer String?
+  isCorrect      Boolean  @default(false)
+
+  @@unique([participantId, questionId])
+}

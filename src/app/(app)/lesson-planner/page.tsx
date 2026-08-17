@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ArrowLeft, Sparkles, Download, Clock, Target, PenTool, CheckCircle, Upload, X, Plus, Pencil, Trash2, BookOpen } from "lucide-react";
+import { ArrowLeft, Sparkles, Download, Clock, Target, PenTool, CheckCircle, Upload, X, Plus, Pencil, Trash2, BookOpen, AlertCircle } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import toast from "react-hot-toast";
@@ -44,6 +44,12 @@ interface ClassItem {
 
 type ViewState = 'list' | 'form' | 'detail';
 
+type AiInsightState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'ready'; text: string };
+
 export default function LessonPlanner() {
   const router = useRouter();
   const { plans, addPlan, updatePlan, removePlan } = useLessonPlans();
@@ -67,8 +73,12 @@ export default function LessonPlanner() {
     subject: "",
     topic: "",
     duration: "45",
+    additionalInfo: "",
   });
   const [file, setFile] = useState<File | null>(null);
+
+  const [showAiInsightModal, setShowAiInsightModal] = useState(false);
+  const [aiInsight, setAiInsight] = useState<AiInsightState>({ status: 'idle' });
 
   useEffect(() => {
     fetch("/api/classes").then(r => r.json()).then(data => {
@@ -126,8 +136,34 @@ export default function LessonPlanner() {
       subject: formData.subject,
       topic: formData.topic,
       duration: formData.duration,
+      additionalInfo: formData.additionalInfo || undefined,
       fileData: base64File ? { data: base64File, mimeType, name: fileName } : null
     });
+  };
+
+  const handleGetAiInsight = () => {
+    if (!formData.classId) return toast.error("Avval sinfni tanlang");
+    setShowAiInsightModal(true);
+    setAiInsight({ status: 'loading' });
+    fetch(`/api/classes/${formData.classId}/lesson-insights`)
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Xatolik");
+        return data;
+      })
+      .then((data: { malumot: string }) => setAiInsight({ status: 'ready', text: data.malumot }))
+      .catch(() => setAiInsight({ status: 'error' }));
+  };
+
+  const acceptAiInsight = () => {
+    if (aiInsight.status === 'ready') {
+      setFormData(f => ({ ...f, additionalInfo: aiInsight.text }));
+    }
+    setShowAiInsightModal(false);
+  };
+
+  const rejectAiInsight = () => {
+    setShowAiInsightModal(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,14 +191,14 @@ export default function LessonPlanner() {
 
   const openCreateForm = () => {
     setEditingId(null);
-    setFormData({ classId: activeFilter !== 'all' ? activeFilter : (classes[0]?.id || ""), subject: "", topic: "", duration: "45" });
+    setFormData({ classId: activeFilter !== 'all' ? activeFilter : (classes[0]?.id || ""), subject: "", topic: "", duration: "45", additionalInfo: "" });
     setFile(null);
     setView('form');
   };
 
   const openEditForm = (plan: LessonPlanRecord) => {
     setEditingId(plan.id);
-    setFormData({ classId: plan.classId, subject: plan.subject, topic: plan.content.title, duration: "45" });
+    setFormData({ classId: plan.classId, subject: plan.subject, topic: plan.content.title, duration: "45", additionalInfo: "" });
     setFile(null);
     setView('form');
   };
@@ -305,6 +341,28 @@ export default function LessonPlanner() {
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
             />
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-[var(--text-secondary)]">Qo&apos;shimcha ma&apos;lumotlar (ixtiyoriy)</label>
+                <button
+                  type="button"
+                  onClick={handleGetAiInsight}
+                  disabled={!formData.classId}
+                  className="text-xs font-medium flex items-center gap-1 disabled:opacity-40"
+                  style={{ color: "var(--accent-primary)" }}
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> AI orqali ma&apos;lumot olish
+                </button>
+              </div>
+              <textarea
+                value={formData.additionalInfo}
+                onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
+                placeholder="Sinf haqida qo'shimcha ma'lumot, masalan o'quvchilarning bilim darajasi yoki e'tibor talab qiladigan mavzular"
+                rows={3}
+                className="w-full border border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--input-text)] rounded-[var(--radius)] px-2.5 py-2.5 text-[13px] outline-none transition-colors focus:border-[var(--accent-primary)] focus:shadow-[0_0_0_2px_var(--accent-bg-tint)] placeholder:text-[var(--text-muted)] resize-none"
+              />
+            </div>
 
             <div>
               <label className="text-xs font-medium text-[var(--text-secondary)]">Qo&apos;shimcha material (ixtiyoriy)</label>
@@ -468,6 +526,54 @@ export default function LessonPlanner() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAiInsightModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40">
+          <div className="bg-[var(--card-bg)] rounded-[var(--radius-card)] shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="p-4 border-b-[0.5px] flex justify-between items-center" style={{ borderColor: "var(--card-border)" }}>
+              <h2 className="font-medium text-[var(--text-primary)] flex items-center gap-2">
+                <Sparkles className="w-4 h-4" style={{ color: "var(--accent-primary)" }} /> AI ma&apos;lumoti
+              </h2>
+              <button onClick={rejectAiInsight} className="p-1 text-[var(--text-muted)]">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              {aiInsight.status === 'loading' && (
+                <p className="text-sm text-[var(--text-muted)] animate-pulse">AI ma&apos;lumot tayyorlamoqda...</p>
+              )}
+
+              {aiInsight.status === 'error' && (
+                <div className="p-3 rounded-[var(--radius)] text-sm flex items-start gap-2" style={{ background: "var(--danger-bg)", color: "var(--danger-text)" }}>
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <p>Ma&apos;lumot olishda xatolik yuz berdi.</p>
+                </div>
+              )}
+
+              {aiInsight.status === 'ready' && (
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{aiInsight.text}</p>
+              )}
+
+              {aiInsight.status === 'ready' && (
+                <div>
+                  <p className="text-xs text-[var(--text-muted)] mb-2">Shu ma&apos;lumot qo&apos;shimcha ma&apos;lumotlar qismiga qo&apos;shilsinmi?</p>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="secondary" onClick={rejectAiInsight}>YO&apos;Q</Button>
+                    <Button onClick={acceptAiInsight}>HA</Button>
+                  </div>
+                </div>
+              )}
+
+              {aiInsight.status === 'error' && (
+                <div className="flex gap-2 justify-end">
+                  <Button variant="secondary" onClick={rejectAiInsight}>Yopish</Button>
+                  <Button onClick={handleGetAiInsight}>Qayta urinish</Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users2, CheckSquare, BookOpen, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, Users2, CheckSquare, BookOpen, FileBarChart } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
 const tabItems = [
@@ -10,7 +10,7 @@ const tabItems = [
   { name: "Sinflar", href: "/classes", icon: Users2 },
   { name: "Tekshirish", href: "/grader", icon: CheckSquare },
   { name: "Dars Rejasi", href: "/lesson-planner", icon: BookOpen },
-  { name: "Ko'proq", href: "/more", icon: MoreHorizontal },
+  { name: "Hisobot", href: "/report", icon: FileBarChart },
 ];
 
 export default function TabBar() {

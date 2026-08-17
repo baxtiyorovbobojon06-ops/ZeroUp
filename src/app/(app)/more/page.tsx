@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FileSignature, FileBarChart, Settings, ChevronRight, LogOut } from "lucide-react";
+import { FileSignature, Settings, Radio, ChevronRight, LogOut } from "lucide-react";
 import toast from "react-hot-toast";
 import { useSettings } from "@/contexts/SettingsContext";
 
 const items = [
+  { label: "Jonli test", href: "/live", icon: Radio, color: "#378ADD" },
   { label: "Testlar", href: "/more/tests", icon: FileSignature, color: "#378ADD" },
-  { label: "Hisobot", href: "/more/report", icon: FileBarChart, color: "#3B6D11" },
   { label: "Sozlamalar", href: "/more/settings", icon: Settings, color: "#378ADD" },
 ];
 

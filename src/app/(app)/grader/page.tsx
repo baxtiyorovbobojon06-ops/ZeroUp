@@ -11,7 +11,7 @@ import { z } from 'zod';
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Select } from "@/components/ui/Input";
+import { Input, Select } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 const schema = z.object({
@@ -53,6 +53,12 @@ export default function Grader() {
 
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedTestId, setSelectedTestId] = useState("");
+
+  const [manualMode, setManualMode] = useState(false);
+  const [manualSubject, setManualSubject] = useState("");
+  const [manualTitle, setManualTitle] = useState("");
+  const [manualQuestionCount, setManualQuestionCount] = useState("10");
+  const [manualAnswers, setManualAnswers] = useState<Record<number, string>>({});
 
   const [files, setFiles] = useState<File[]>([]);
 
@@ -111,16 +117,37 @@ export default function Grader() {
     setFiles(files.filter((_, i) => i !== index));
   };
 
+  const manualQCount = parseInt(manualQuestionCount, 10) || 0;
+  const manualAllAnswered = manualQCount > 0 && Array.from({ length: manualQCount }, (_, i) => i + 1).every(q => !!manualAnswers[q]);
+  const buildManualAnswerKey = () => Array.from({ length: manualQCount }, (_, i) => `${i + 1}-${manualAnswers[i + 1]}`).join(", ");
+
+  const setManualAnswer = (question: number, letter: string) => {
+    setManualAnswers(prev => ({ ...prev, [question]: prev[question] === letter ? "" : letter }));
+  };
+
   const handleSubmit = async () => {
-    if (!selectedClassId || !selectedTestId) {
-      return toast.error("Sinf va testni tanlang");
+    if (!selectedClassId) {
+      return toast.error("Sinfni tanlang");
     }
     if (files.length === 0) {
       return toast.error("Kamida bitta rasm yuklang!");
     }
 
-    const test = tests.find(t => t.id === selectedTestId);
-    if (!test) return toast.error("Test topilmadi");
+    let answerKey: string;
+    let questionCount: number;
+
+    if (manualMode) {
+      if (manualQCount < 1) return toast.error("Savollar sonini kiriting");
+      if (!manualAllAnswered) return toast.error("Barcha savollar uchun to'g'ri javobni belgilang");
+      answerKey = buildManualAnswerKey();
+      questionCount = manualQCount;
+    } else {
+      if (!selectedTestId) return toast.error("Testni tanlang");
+      const test = tests.find(t => t.id === selectedTestId);
+      if (!test) return toast.error("Test topilmadi");
+      answerKey = test.answerKey;
+      questionCount = test.questionCount;
+    }
 
     toast.loading("Rasmlar bazaga tayyorlanmoqda...", { id: "graderLoad" });
 
@@ -140,9 +167,9 @@ export default function Grader() {
       toast.dismiss("graderLoad");
 
       submit({
-        testId: selectedTestId,
-        answerKey: test.answerKey,
-        questionCount: test.questionCount,
+        testId: manualMode ? null : selectedTestId,
+        answerKey,
+        questionCount,
         images: imagesData
       });
     } catch {
@@ -156,11 +183,33 @@ export default function Grader() {
     setIsSaving(true);
 
     try {
+      let testIdToUse = selectedTestId;
+
+      if (manualMode) {
+        const createRes = await fetch("/api/tests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            classId: selectedClassId,
+            subject: manualSubject.trim() || "Noma'lum",
+            title: manualTitle.trim() || "Qo'lda kiritilgan test",
+            questionCount: manualQCount,
+            answerKey: buildManualAnswerKey(),
+          })
+        });
+        if (!createRes.ok) {
+          toast.error("Testni saqlashda xatolik yuz berdi");
+          return;
+        }
+        const createdTest = await createRes.json();
+        testIdToUse = createdTest.id;
+      }
+
       const res = await fetch("/api/attempts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          testId: selectedTestId,
+          testId: testIdToUse,
           classId: selectedClassId,
           results: result.results
         })
@@ -180,7 +229,7 @@ export default function Grader() {
 
   const result = streamedResult;
   const hasResults = result?.results && result.results.length > 0;
-  const canSubmit = !isLoading && files.length > 0 && !!selectedTestId;
+  const canSubmit = !isLoading && files.length > 0 && (manualMode ? manualAllAnswered : !!selectedTestId);
 
   return (
     <div className="space-y-5">
@@ -202,17 +251,93 @@ export default function Grader() {
           ))}
         </Select>
 
-        <Select
-          label="Test"
-          value={selectedTestId}
-          onChange={e => setSelectedTestId(e.target.value)}
-          disabled={!selectedClassId || tests.length === 0}
+        {!manualMode && (
+          <Select
+            label="Test"
+            value={selectedTestId}
+            onChange={e => setSelectedTestId(e.target.value)}
+            disabled={!selectedClassId || tests.length === 0}
+          >
+            {tests.length === 0 && <option value="">Testlar yo&apos;q</option>}
+            {tests.map(t => (
+              <option key={t.id} value={t.id}>{t.title} ({t.questionCount} ta savol)</option>
+            ))}
+          </Select>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setManualMode(v => !v)}
+          className="text-xs font-medium flex items-center gap-1"
+          style={{ color: "var(--accent-primary)" }}
         >
-          {tests.length === 0 && <option value="">Testlar yo&apos;q</option>}
-          {tests.map(t => (
-            <option key={t.id} value={t.id}>{t.title} ({t.questionCount} ta savol)</option>
-          ))}
-        </Select>
+          {manualMode ? "Ro'yxatdan test tanlash" : "Ilovada yo'q testni tekshirish"}
+        </button>
+
+        {manualMode && (
+          <div className="space-y-3 p-3 rounded-[var(--radius-card)]" style={{ background: "var(--input-bg)" }}>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="Fan (ixtiyoriy)"
+                type="text"
+                value={manualSubject}
+                onChange={e => setManualSubject(e.target.value)}
+                placeholder="Matematika"
+              />
+              <Input
+                label="Test nomi (ixtiyoriy)"
+                type="text"
+                value={manualTitle}
+                onChange={e => setManualTitle(e.target.value)}
+                placeholder="Nazorat ishi"
+              />
+            </div>
+
+            <Input
+              label="Savollar soni"
+              type="number"
+              min="1"
+              max="90"
+              value={manualQuestionCount}
+              onChange={e => setManualQuestionCount(e.target.value)}
+            />
+
+            <div>
+              <label className="text-xs font-medium text-[var(--text-secondary)]">Javob kaliti</label>
+              <div className="mt-1.5 grid grid-cols-4 gap-2 max-h-72 overflow-y-auto pr-1">
+                {Array.from({ length: manualQCount }, (_, i) => i + 1).map(q => (
+                  <div
+                    key={q}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-lg border-[0.5px]"
+                    style={{ borderColor: "var(--card-border)", background: "var(--card-bg)" }}
+                  >
+                    <span className="text-[10px] text-[var(--text-muted)]">{q}</span>
+                    <div className="flex gap-1">
+                      {["A", "B", "C", "D"].map(letter => (
+                        <button
+                          key={letter}
+                          type="button"
+                          onClick={() => setManualAnswer(q, letter)}
+                          className="w-6 h-6 rounded text-[10px] font-medium transition-colors"
+                          style={manualAnswers[q] === letter
+                            ? { background: "var(--accent-primary)", color: "#fff" }
+                            : { background: "var(--input-bg)", color: "var(--text-secondary)" }}
+                        >
+                          {letter}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {manualQCount > 0 && (
+                <p className="text-[11px] text-[var(--text-muted)] mt-1.5">
+                  {Object.values(manualAnswers).filter(Boolean).length}/{manualQCount} ta savol belgilandi
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="text-xs font-medium text-[var(--text-secondary)]">Javob varaqalari (Rasmlar)</label>
