@@ -191,7 +191,6 @@ export default function LessonPlanner() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Ilg&apos;or Dars Rejasi (Jonli AI)</h1>
-          <p className="text-slate-500 dark:text-slate-400">Kutib turmasdan darhol dars rejasini ko&apos;ring</p>
         </div>
       </div>
 

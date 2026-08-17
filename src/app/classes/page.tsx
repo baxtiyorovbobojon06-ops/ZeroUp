@@ -172,7 +172,6 @@ export default function ClassesPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Sinflar va O&apos;quvchilar</h1>
-          <p className="text-slate-500 dark:text-slate-400">Barcha sinflarni va ulardagi o&apos;quvchilarni boshqarish</p>
         </div>
       </div>
 

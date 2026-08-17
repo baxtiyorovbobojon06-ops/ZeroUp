@@ -10,7 +10,6 @@ import {
   CheckSquare,
   FileBarChart,
   Settings,
-  Sparkles,
   Menu,
   X,
   Users
@@ -35,17 +34,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-transparent z-40 relative">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shrink-0">
-            <Sparkles className="text-white w-4 h-4" />
-          </div>
-          <div className="flex flex-col overflow-hidden">
-            <span className="text-sm font-bold text-primary truncate max-w-[120px]">
-              {profileName} 👋
-            </span>
-          </div>
-        </Link>
+      <div className="md:hidden flex items-center justify-end p-4 bg-transparent z-40 relative">
         <button onClick={() => setIsOpen(true)} className="p-2 text-slate-600 hover:bg-white/50 rounded-xl transition-colors">
           <Menu className="w-6 h-6" />
         </button>
@@ -63,17 +52,7 @@ export default function Sidebar() {
       <aside className={`fixed md:relative inset-y-0 left-0 z-50 w-72 md:w-[260px] glass-panel h-full flex flex-col shadow-2xl border-r md:border-r-0 md:border md:rounded-3xl border-white/60 overflow-hidden transform transition-transform duration-300 ease-out md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
         
         {/* Header inside sidebar */}
-        <div className="h-20 md:h-24 flex items-center justify-between px-6 md:px-8 border-b border-white/40">
-          <Link href="/" className="flex items-center gap-3 group" onClick={() => setIsOpen(false)}>
-            <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg transition-all duration-300 transform group-hover:rotate-6 shrink-0">
-              <Sparkles className="text-white w-5 h-5" />
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-lg font-bold text-primary truncate">
-                {profileName} 👋
-              </span>
-            </div>
-          </Link>
+        <div className="h-20 md:h-24 flex items-center justify-end px-6 md:px-8 border-b border-white/40">
           <button onClick={() => setIsOpen(false)} className="md:hidden p-2 text-slate-400 hover:bg-white/50 hover:text-slate-700 rounded-xl transition-colors">
             <X className="w-6 h-6" />
           </button>

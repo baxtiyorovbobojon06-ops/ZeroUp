@@ -125,7 +125,6 @@ function ReportContent() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{data.title} - Hisobot</h1>
-            <p className="text-slate-500 dark:text-slate-400">{data.class?.name} • {data.subject} • {attempts.length} o&apos;quvchi topshirgan</p>
           </div>
         </div>
       </div>

@@ -80,18 +80,7 @@ export default function Home() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Xush kelibsiz</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Salom, {profileName} 👋</h1>
-        </div>
-        <Link
-          href="/settings"
-          className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold shrink-0 hover:bg-primary/20 transition-colors"
-        >
-          {profileName ? profileName.charAt(0).toUpperCase() : "O'"}
-        </Link>
-      </div>
+      <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Salom, {profileName} 👋</h1>
 
       {classesError ? (
         <div className="rounded-3xl border border-dashed border-red-200 dark:border-red-500/30 p-6 text-center text-sm text-red-500 dark:text-red-400">

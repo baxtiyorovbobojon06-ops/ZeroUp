@@ -633,7 +633,6 @@ export default function SettingsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{t("settings_title")}</h1>
-            <p className="text-slate-500 dark:text-slate-400">{t("settings_desc")}</p>
           </div>
         </div>
       )}
