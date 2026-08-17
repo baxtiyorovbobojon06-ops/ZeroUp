@@ -12,7 +12,7 @@ export const maxDuration = 60;
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { grade, subject, topic, duration, fileData } = body;
+    const { grade, subject, topic, duration, fileData, additionalInfo } = body;
 
     if (!grade || !subject || !topic || !duration) {
       return new Response(JSON.stringify({ error: "Barcha asosiy maydonlarni to'ldiring" }), { status: 400 });
@@ -46,6 +46,7 @@ Sen tajribali metodist va O'zbekiston maktablari uchun sun'iy intellekt ta'lim y
 Sinf: ${grade}
 Fan: ${subject}
 Mavzu: ${topic}
+${additionalInfo ? `Sinf haqida qo'shimcha ma'lumot: ${additionalInfo}` : ""}
 ${extractedText ? `Qo'shimcha material matni: ${extractedText.substring(0, 15000)}...` : ""}
 
 Dars rejasi quyidagi qismlardan iborat bo'lsin:
