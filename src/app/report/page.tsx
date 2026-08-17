@@ -2,11 +2,14 @@
 
 import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { FileBarChart, ArrowLeft, BrainCircuit, Target, AlertCircle } from "lucide-react";
+import { FileBarChart, ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { StatistikaSection, ReportStats } from "@/components/report/StatistikaSection";
+import { LowPerformersSection, LowPerformer } from "@/components/report/LowPerformersSection";
+import { AiAnalysisSection } from "@/components/report/AiAnalysisSection";
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -43,6 +46,11 @@ function ReportContent() {
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [stats, setStats] = useState<ReportStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(false);
+  const [lowPerformers, setLowPerformers] = useState<LowPerformer[]>([]);
+
   useEffect(() => {
     if (testId) {
       fetch(`/api/reports?testId=${testId}`)
@@ -54,6 +62,21 @@ function ReportContent() {
         .catch(() => {
           toast.error("Xatolik yuz berdi");
           setLoading(false);
+        });
+
+      fetch(`/api/report?testId=${testId}`)
+        .then(r => {
+          if (!r.ok) throw new Error();
+          return r.json();
+        })
+        .then(res => {
+          setStats(res);
+          setLowPerformers(Array.isArray(res.lowPerformers) ? res.lowPerformers : []);
+          setStatsLoading(false);
+        })
+        .catch(() => {
+          setStatsError(true);
+          setStatsLoading(false);
         });
     }
   }, [testId]);
@@ -110,7 +133,6 @@ function ReportContent() {
     );
   }
 
-  const report = data.reports?.[0];
   const attempts = data.attempts || [];
 
   return (
@@ -143,24 +165,12 @@ function ReportContent() {
         />
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="p-5 flex flex-col justify-center">
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">O&apos;rtacha natija</p>
-              <p className="text-3xl font-black text-indigo-600 dark:text-indigo-400">{report?.averageScore?.toFixed(1) || 0}</p>
-            </Card>
-            <Card className="p-5 flex flex-col justify-center">
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Eng baland ball</p>
-              <p className="text-3xl font-black text-emerald-600 dark:text-emerald-400">{report?.highestScore || 0}</p>
-            </Card>
-            <Card className="p-5 flex flex-col justify-center">
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Eng past ball</p>
-              <p className="text-3xl font-black text-red-500 dark:text-red-400">{report?.lowestScore || 0}</p>
-            </Card>
-            <Card className="p-5 flex flex-col justify-center">
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Tekshirilgan</p>
-              <p className="text-3xl font-black text-slate-800 dark:text-slate-100">{attempts.length}</p>
-            </Card>
+          <div>
+            <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Statistika</h2>
+            <StatistikaSection stats={stats} loading={statsLoading} error={statsError} />
           </div>
+
+          <LowPerformersSection students={lowPerformers} />
 
           <div className="grid lg:grid-cols-[1fr_350px] gap-6">
             <div className="space-y-6">
@@ -230,26 +240,7 @@ function ReportContent() {
             </div>
 
             <div className="space-y-6">
-              <Card className="p-5 bg-gradient-to-br from-indigo-600 to-violet-700 text-white border-none shadow-md">
-                <div className="flex items-center gap-2 mb-4">
-                  <BrainCircuit className="w-6 h-6 text-indigo-200" />
-                  <h3 className="font-bold text-lg">AI Pedagogik Tahlil</h3>
-                </div>
-                <div className="space-y-4 text-sm text-indigo-50 leading-relaxed">
-                  <p>
-                    Ushbu test natijalariga ko&apos;ra, sinfning umumiy o&apos;zlashtirishi qoniqarli, ammo ba&apos;zi mavzularda bo&apos;shliqlar mavjud. O&apos;quvchilar asosan 4, 7 va 12-savollarda ko&apos;p xato qilishgan.
-                  </p>
-                  <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-                    <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
-                      <Target className="w-4 h-4" /> Tavsiyalar
-                    </h4>
-                    <ul className="space-y-2 text-indigo-100 list-disc pl-4">
-                      <li>Kuchsiz o&apos;zlashtirgan mavzularni (kasrlar qisqartirilishi ehtimoli katta) keyingi darsda qayta tushuntirish tavsiya etiladi.</li>
-                      <li>Past ko&apos;rsatkich qayd etgan 3 nafar o&apos;quvchi uchun qo&apos;shimcha topshiriqlar ajratish kerak.</li>
-                    </ul>
-                  </div>
-                </div>
-              </Card>
+              <AiAnalysisSection testId={testId} />
             </div>
           </div>
         </>
