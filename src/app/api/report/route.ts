@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { getReportStats } from '@/lib/server/report';
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
+export async function GET() {
+  try {
+    const stats = await getReportStats();
+    return NextResponse.json(stats);
+  } catch (error) {
+    console.error("GET /api/report error:", error);
+    return NextResponse.json({ error: "Statistikani yuklashda xatolik yuz berdi" }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {
